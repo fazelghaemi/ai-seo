@@ -2,14 +2,13 @@
 /**
  * Ready Studio SEO Engine - Core Settings
  *
- * v12.3: Fixed duplicate "Ready Studio" submenu by registering the
- * "Settings" page as the *first* submenu item with the
- * parent slug.
- * v12.2: Added "Test Connection" button.
- * v12.1: Updated to use custom SVG logo and branding.
+ * v12.6: CRITICAL FIX - Removed the 'Robots.txt' submenu registration.
+ * This was causing a fatal error because the module class was not
+ * yet loaded. The module itself (class-rs-module-robots.php)
+ * is correctly responsible for registering its own menu page.
  *
  * @package   ReadyStudio
- * @version   12.3.0
+ * @version   12.6.0
  * @author    Fazel Ghaemi
  */
 
@@ -24,12 +23,6 @@ class ReadyStudio_Core_Settings {
 	 * @var array
 	 */
 	private $options;
-
-	/**
-	 * The hook suffix for the main admin page.
-	 * @var string
-	 */
-	private $main_menu_hook_suffix = '';
 
 	/**
 	 * Core API instance (injected).
@@ -57,7 +50,7 @@ class ReadyStudio_Core_Settings {
 		// Hook to add custom CSS for the admin menu icon
 		add_action( 'admin_head', [ $this, 'admin_menu_styles' ] );
 
-		// Hook for the new test connection button
+		// Hook for the test connection button
 		add_action( 'wp_ajax_rs_test_connection', [ $this, 'ajax_handle_test_connection' ] );
 	}
 
@@ -68,7 +61,7 @@ class ReadyStudio_Core_Settings {
 	 */
 	public function register_menus() {
 		// Main Menu Page (Dashboard / Settings)
-		$this->main_menu_hook_suffix = add_menu_page(
+		add_menu_page(
 			'AI SEO',               // Page Title (Browser tab title)
 			'Ready Studio',         // Menu Title (What user sees in menu)
 			'manage_options',       // Capability
@@ -78,11 +71,7 @@ class ReadyStudio_Core_Settings {
 			99                      // Position
 		);
 
-		// *** MENU FIX ***
-		// 1. Add "Settings" as the FIRST submenu item.
-		// Its slug MUST match the parent's slug ('promptseo_dashboard').
-		// This tells WordPress that this *is* the main page,
-		// preventing the duplicate "Ready Studio" link.
+		// 1. "Settings" submenu
 		add_submenu_page(
 			'promptseo_dashboard',
 			'تنظیمات',              // Page Title
@@ -92,8 +81,7 @@ class ReadyStudio_Core_Settings {
 			[ $this, 'render_dashboard_page' ] // Same callback
 		);
 
-		// 2. Add "Bulk Generator" as the SECOND submenu item.
-		// Its slug must be unique.
+		// 2. "Bulk Generator" submenu
 		add_submenu_page(
 			'promptseo_dashboard',
 			'تولید انبوه',          // Page Title
@@ -102,6 +90,9 @@ class ReadyStudio_Core_Settings {
 			'promptseo_bulk',       // Menu Slug (unique)
 			[ 'ReadyStudio_Core_Bulk', 'render_page' ] // Static callback
 		);
+		
+		// 3. *** REMOVED in v12.6 ***
+		// The 'Robots.txt' module now handles its own menu registration.
 	}
 
 	/**
@@ -190,6 +181,9 @@ class ReadyStudio_Core_Settings {
 				'desc' => 'قوانین اجباری که AI باید رعایت کند. (مثال: همیشه در توضیحات متا از هشتگ #ReadyPrompt استفاده کن.)'
 			]
 		);
+		
+		// *** REMOVED in v12.6 ***
+		// Robots.txt settings are now registered by the module itself.
 	}
 
 	/**
@@ -201,7 +195,6 @@ class ReadyStudio_Core_Settings {
 		?>
 		<div class="wrap rs-wrap settings-page" dir="rtl">
 			
-			<!-- UPDATED HEADER with AI SEO Logo and Ready Studio family name -->
 			<div class="rs-header">
 				<h1>
 					AI SEO
@@ -224,7 +217,6 @@ class ReadyStudio_Core_Settings {
 			<form method="post" action="options.php" style="margin:0;">
 				<?php settings_fields( 'promptseo_opts_group' ); ?>
 				
-				<!-- Nonce field for the Test Connection button -->
 				<?php wp_nonce_field( 'rs_nonce_action', 'rs_test_nonce' ); ?>
 
 				<!-- Tab 1: API Settings Content -->
@@ -232,7 +224,6 @@ class ReadyStudio_Core_Settings {
 					<table class="form-table">
 						<?php do_settings_fields( 'promptseo_dashboard', 'rs_api_section' ); ?>
 						
-						<!-- Test Connection Button -->
 						<tr valign="top">
 							<th scope="row">تست اتصال</th>
 							<td>
@@ -261,33 +252,25 @@ class ReadyStudio_Core_Settings {
 
 	/**
 	 * AJAX handler for the Test Connection button.
-	 * Fired by 'wp_ajax_rs_test_connection' hook.
 	 */
 	public function ajax_handle_test_connection() {
-		// 1. Security Check
-		if ( ! check_ajax_referer( 'rs_nonce_action', 'rs_test_nonce', false ) ) {
-			wp_send_json_error( [ 'message' => 'Invalid security token.' ] );
+		if ( ! isset( $_POST['rs_test_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( $_POST['rs_test_nonce'] ), 'rs_nonce_action' ) ) {
+			wp_send_json_error( [ 'message' => 'Invalid security token (Nonce failed).' ] );
 			return;
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [ 'message' => 'Permission denied.' ] );
 			return;
 		}
-
-		// 2. Get *unsaved* data directly from POST
 		$worker_url = isset( $_POST['worker_url'] ) ? esc_url_raw( $_POST['worker_url'] ) : '';
 		$api_key = isset( $_POST['api_key'] ) ? sanitize_text_field( $_POST['api_key'] ) : '';
 
-		// 3. Check if API class is available (it should be)
 		if ( ! $this->api || ! method_exists( $this->api, 'test_connection' ) ) {
 			wp_send_json_error( [ 'message' => 'خطای داخلی: نمونه API یا تابع تست بارگذاری نشده است.' ] );
 			return;
 		}
-
-		// 4. Call the new test function in the API class
 		$response = $this->api->test_connection( $worker_url, $api_key );
 
-		// 5. Send response
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( [ 'message' => $response->get_error_message() ] );
 		} else {
@@ -297,41 +280,27 @@ class ReadyStudio_Core_Settings {
 
 	/**
 	 * Injects CSS into the admin head to apply the custom SVG menu icon.
-	 * Fired by 'admin_head' hook.
 	 */
 	public function admin_menu_styles() {
-		// Get the URL of the SVG logo
 		$icon_url = RS_SEO_URL . 'assets/logo/aiseo-logo.svg';
-		
-		// The ID of the menu item is 'toplevel_page_' + $menu_slug
 		$menu_slug = 'promptseo_dashboard';
 		$menu_id = '#toplevel_page_' . $menu_slug;
-		
 		?>
 		<style type="text/css">
-			/*
-			 * Target the menu item's image wrapper and set the custom icon.
-			 */
 			<?php echo esc_html( $menu_id ); ?> .wp-menu-image {
-				background-color: #a0a5aa; /* Default gray icon color */
+				background-color: #a0a5aa;
 				-webkit-mask: url('<?php echo esc_url( $icon_url ); ?>') no-repeat center center;
 				mask: url('<?php echo esc_url( $icon_url ); ?>') no-repeat center center;
-				
-				/* *** ICON SIZE FIX *** */
 				-webkit-mask-size: 18px 18px;
 				mask-size: 18px 18px;
 				background-size: 18px 18px;
 				background-position: center center;
 			}
-			
-			/* Change color on hover/active (Use brand accent) */
 			<?php echo esc_html( $menu_id ); ?>:hover .wp-menu-image,
 			<?php echo esc_html( $menu_id ); ?>.wp-has-current-submenu .wp-menu-image,
 			<?php echo esc_html( $menu_id ); ?>.current .wp-menu-image {
-				background-color: var(--rs-accent, #01ada1); /* Brand mint color */
+				background-color: var(--rs-accent, #01ada1);
 			}
-			
-			/* Hide the dashicon 'none' icon */
 			<?php echo esc_html( $menu_id ); ?> .wp-menu-image::before {
 				content: '' !important;
 			}
@@ -341,11 +310,6 @@ class ReadyStudio_Core_Settings {
 
 	// --- Field Renderer Callbacks ---
 
-	/**
-	 * Renders a standard text, url, or password input field.
-	 *
-	 * @param array $args Arguments for the field.
-	 */
 	public function render_field_text( $args ) {
 		$id = esc_attr( $args['id'] );
 		$type = isset( $args['type'] ) ? esc_attr( $args['type'] ) : 'text';
@@ -357,11 +321,6 @@ class ReadyStudio_Core_Settings {
 		echo "</div>";
 	}
 
-	/**
-	 * Renders a select (dropdown) field.
-	 *
-	 * @param array $args Arguments for the field.
-	 */
 	public function render_field_select( $args ) {
 		$id = esc_attr( $args['id'] );
 		$options = $args['options'];
@@ -377,37 +336,53 @@ class ReadyStudio_Core_Settings {
 		echo "</div>";
 	}
 
-	/**
-	 * Renders a textarea field (for AI Brain).
-	 *
-	 * @param array $args Arguments for the field.
-	 */
 	public function render_field_textarea( $args ) {
+		// Default to main options group
+		$option_name = isset( $args['option_name'] ) ? esc_attr( $args['option_name'] ) : 'promptseo_ultimate_options';
+		// Load the correct options array
+		$options = ( $option_name === 'promptseo_ultimate_options' ) ? $this->options : get_option( $option_name, [] );
+		
 		$id = esc_attr( $args['id'] );
 		$desc = esc_html( $args['desc'] );
-		$value = isset( $this->options[$id] ) ? esc_textarea( $this->options[$id] ) : '';
+		$class = isset( $args['class'] ) ? esc_attr( $args['class'] ) : 'ai-brain-textarea';
+		$value = isset( $options[$id] ) ? esc_textarea( $options[$id] ) : '';
 
 		echo "<div class='pseo-field'>";
-		echo "<textarea id='field-{$id}' name='promptseo_ultimate_options[{$id}]' class='ai-brain-textarea'>{$value}</textarea>";
+		echo "<textarea id='field-{$id}' name='{$option_name}[{$id}]' class='{$class}'>{$value}</textarea>";
 		echo "<p class='ai-brain-desc'>{$desc}</p>";
 		echo "</div>";
 	}
 
 	/**
-	 * Sanitizes the options array before saving to DB.
-	 *
-	 * @param array $input The raw input from the settings form.
-	 * @return array The sanitized array.
+	 * Renders a toggle switch.
+	 */
+	public function render_field_toggle( $args ) {
+		$option_name = esc_attr( $args['option_name'] );
+		$options = get_option( $option_name, [] );
+		$id = esc_attr( $args['id'] );
+		$desc = esc_html( $args['desc'] );
+		$checked = isset( $options[$id] ) ? checked( $options[$id], 'on', false ) : '';
+		
+		echo "<div class 'pseo-field'>";
+		// Note: The 'rs-toggle-switch' class is defined in style-core.css
+		echo "<label for='field-{$id}' class='rs-toggle-switch'>";
+		echo "<input type='checkbox' id='field-{$id}' name='{$option_name}[{$id}]' {$checked} onchange='this.form.submit()'>";
+		echo "<span class='rs-toggle-slider'></span>";
+		echo "</label>";
+		echo "<p class='description' style='display: inline-block; margin-right: 10px;'>{$desc}</p>";
+		echo "</div>";
+	}
+
+	/**
+	 * Sanitizes the main options array.
 	 */
 	public function sanitize_options( $input ) {
-		// Get previously saved options, as $input only contains submitted fields
 		$output = get_option( 'promptseo_ultimate_options', [] );
 
 		if ( isset( $input['worker_url'] ) ) {
 			$output['worker_url'] = esc_url_raw( $input['worker_url'] );
 		}
 		if ( isset( $input['api_key'] ) ) {
-			// Don't overwrite with empty if it's already set (password fields)
 			if ( ! empty( $input['api_key'] ) ) {
 				$output['api_key'] = sanitize_text_field( $input['api_key'] );
 			}
@@ -416,7 +391,6 @@ class ReadyStudio_Core_Settings {
 			$output['model_name'] = sanitize_text_field( $input['model_name'] );
 		}
 		if ( isset( $input['site_knowledge_base'] ) ) {
-			// Use wp_kses_post to allow some HTML, but still be secure
 			$output['site_knowledge_base'] = wp_kses_post( $input['site_knowledge_base'] );
 		}
 		if ( isset( $input['custom_system_prompt'] ) ) {
@@ -425,5 +399,12 @@ class ReadyStudio_Core_Settings {
 		
 		return $output;
 	}
+
+	/**
+	 * Sanitizes the robots.txt options array.
+	 * This is now correctly registered by the module itself.
+	 */
+	// public function sanitize_robots_options( $input ) { ... } 
+	// This function is now correctly located in class-rs-module-robots.php
 
 } // End class ReadyStudio_Core_Settings

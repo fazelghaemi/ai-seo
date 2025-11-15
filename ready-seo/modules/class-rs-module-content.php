@@ -2,12 +2,11 @@
 /**
  * Ready Studio SEO Engine - Module: Content
  *
- * This module handles the generation of post content ("Content Writer")
- * and the base image Alt Text (which can be overridden by the Vision module).
- * It adds the "Content" tab to the metabox.
+ * v12.5: CRITICAL FIX - Constructor now correctly accepts
+ * the $core_loader argument, preventing a Fatal Error on init.
  *
  * @package   ReadyStudio
- * @version   12.0.0
+ * @version   12.5.0
  * @author    Fazel Ghaemi
  */
 
@@ -31,11 +30,16 @@ class ReadyStudio_Module_Content {
 
 	/**
 	 * Constructor.
-	 * Hooks into the Core Loader.
+	 *
+	 * *** FATAL ERROR FIX (v12.5) ***
+	 * The constructor now accepts the $core_loader (passed by the hook)
+	 * and immediately calls the init() function.
+	 *
+	 * @param ReadyStudio_Core_Loader $core_loader The main loader instance.
 	 */
-	public function __construct() {
-		// This hook is fired by the Core Loader
-		add_action( 'rs_core_loaded', [ $this, 'init' ] );
+	public function __construct( $core_loader ) {
+		// Call the init function immediately, passing the loader
+		$this->init( $core_loader );
 	}
 
 	/**
@@ -174,5 +178,6 @@ class ReadyStudio_Module_Content {
 
 // Instantiate the module by hooking into the core loader
 add_action( 'rs_core_loaded', function( $core_loader ) {
+	// The $core_loader is passed by the action in class-rs-core-loader.php
 	new ReadyStudio_Module_Content( $core_loader );
 } );
