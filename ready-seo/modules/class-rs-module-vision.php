@@ -1,11 +1,14 @@
 <?php
 /**
- * Module: Visual Tagger & Style Analyzer
+ * Ready Studio SEO Engine - Module: Vision
  *
- * این ماژول به هسته اصلی متصل شده و قابلیت تحلیل بصری (Gemini Vision)
- * را به افزونه اضافه می‌کند.
+ * This module adds visual analysis capabilities (Gemini Vision).
+ * It "looks" at the featured image to generate highly accurate
+ * alt text, art style tags, and visual keywords.
  *
- * @version 11.0
+ * @package   ReadyStudio
+ * @version   12.0.0
+ * @author    Fazel Ghaemi
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,66 +17,97 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class ReadyStudio_Module_Vision {
 
-	/** @var array هسته تنظیمات افزونه */
-	private $options;
+	/**
+	 * Core API instance (injected).
+	 * @var ReadyStudio_Core_API
+	 */
+	private $api;
 
 	/**
 	 * Constructor.
-	 * قلاب‌های این ماژول را ثبت می‌کند.
+	 * Hooks into the Core Loader.
 	 */
 	public function __construct() {
-		// دریافت تنظیمات ذخیره شده از هسته
-		$this->options = get_option( 'promptseo_ultimate_options' );
-
-		// 1. اضافه کردن CSS اختصاصی این ماژول
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_module_assets' ] );
-
-		// 2. اضافه کردن تب جدید به متاباکس
-		add_action( 'rs_metabox_tabs', [ $this, 'add_vision_tab' ] );
-
-		// 3. رندر کردن محتوای تب
-		add_action( 'rs_metabox_content', [ $this, 'render_vision_tab_content' ] );
-
-		// 4. ثبت AJAX endpoint
-		add_action( 'wp_ajax_pseo_generate_vision', [ $this, 'handle_ajax_generate_vision' ] );
+		// This hook is fired by the Core Loader
+		add_action( 'rs_core_loaded', [ $this, 'init' ] );
 	}
 
 	/**
-	 * 1. بارگذاری فایل CSS اختصاصی این ماژول
+	 * Initialize the module and inject dependencies.
+	 *
+	 * @param ReadyStudio_Core_Loader $core_loader The main loader instance.
+	 */
+	public function init( $core_loader ) {
+		// Inject dependencies from the core
+		$this->api = $core_loader->api;
+		// Note: We don't need $this->data here, as this module
+		// only generates data. The Core Metabox save button handles saving.
+
+		// --- Register hooks for this module ---
+
+		// 1. Add this module's CSS to the post edit screen
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_module_assets' ] );
+
+		// 2. Add the "Vision" tab to the metabox shell
+		add_filter( 'rs_metabox_tabs', [ $this, 'add_tab' ], 30 ); // 30 = third tab
+
+		// 3. Render the content for the "Vision" tab
+		add_action( 'rs_metabox_content', [ $this, 'render_content' ], 30 );
+
+		// 4. Register the AJAX endpoint for this module's "Generate" button
+		add_action( 'wp_ajax_rs_generate_vision', [ $this, 'ajax_handle_generate' ] );
+	}
+
+	/**
+	 * 1. Enqueues the CSS stylesheet specific to this module.
+	 * Fired by 'admin_enqueue_scripts'.
+	 *
+	 * @param string $hook The current admin page hook.
 	 */
 	public function enqueue_module_assets( $hook ) {
 		if ( $hook === 'post.php' || $hook === 'post-new.php' ) {
 			wp_enqueue_style(
 				'rs-module-vision-style',
-				plugin_dir_url( __FILE__ ) . '../assets/css/vision.css', // مسیر فایل CSS
-				[], // وابستگی‌ها
-				'11.0' // ورژن
+				RS_SEO_URL . 'assets/css/module-vision.css',
+				[ 'rs-metabox-style' ], // Depends on metabox styles
+				RS_SEO_VERSION
 			);
 		}
 	}
 
 	/**
-	 * 2. اضافه کردن تب "تحلیل بصری" به لیست تب‌ها
+	 * 2. Adds the "Vision" tab to the metabox.
+	 * Fired by 'rs_metabox_tabs' filter.
+	 *
+	 * @param array $tabs The array of existing tabs.
+	 * @return array The modified array of tabs.
 	 */
-	public function add_vision_tab( $tabs ) {
+	public function add_tab( $tabs ) {
 		$tabs['tab-vision'] = 'تحلیل بصری';
 		return $tabs;
 	}
 
 	/**
-	 * 3. رندر کردن HTML داخل تب "تحلیل بصری"
+	 * 3. Renders the HTML content for the "Vision" tab.
+	 * Fired by 'rs_metabox_content' action.
+	 *
+	 * @param string $active_tab_id The ID of the currently active tab.
 	 */
-	public function render_vision_tab_content( $active_tab ) {
+	public function render_content( $active_tab_id ) {
 		global $post;
 		$thumbnail_url = get_the_post_thumbnail_url( $post->ID, 'medium' );
+		
+		// We use `key($active_tab_id)` if it's an array, or just the string
+		$active_id = is_array($active_tab_id) ? key($active_tab_id) : $active_tab_id;
 		?>
-		<div id="tab-vision" class="rs-tab-content <?php echo $active_tab === 'tab-vision' ? 'active' : ''; ?>">
+		<div id="tab-vision" class="rs-metabox-content <?php echo ( $active_id === 'tab-vision' ) ? 'active' : ''; ?>">
 			
 			<div class="rs-vision-panel">
-				<!-- نمایش تصویر شاخص -->
+				
+				<!-- Featured Image Preview Box -->
 				<div class="rs-vision-preview">
 					<?php if ( $thumbnail_url ) : ?>
-						<img src="<?php echo esc_url( $thumbnail_url ); ?>" alt="Preview">
+						<img src="<?php echo esc_url( $thumbnail_url ); ?>" alt="Image Preview">
 					<?php else : ?>
 						<div class="rs-vision-preview-placeholder">
 							<span class="dashicons dashicons-format-image"></span>
@@ -83,26 +117,30 @@ class ReadyStudio_Module_Vision {
 					<?php endif; ?>
 				</div>
 
-				<button type="button" id="btn-gen-vision" class="pseo-btn btn-vision" <?php echo $thumbnail_url ? '' : 'disabled'; ?>>
-					<span class="dashicons dashicons-visibility"></span>
+				<!-- Generate Button -->
+				<button type="button" id="btn-gen-vision" class="pseo-btn btn-vision" <?php disabled( ! $thumbnail_url ); ?>>
+					<span class="dashicons dashicons-visibility" style="margin-top:4px; margin-left: 5px;"></span>
 					شروع تحلیل بصری (Vision)
 				</button>
 				
-				<div id="load-vision" class="spinner-rs" style="display:none;"></div>
+				<!-- Loader -->
+				<div id="load-vision" class="rs-loader-wrap">
+					<div class="spinner-rs"></div>
+				</div>
 
-				<!-- نتایج -->
-				<div id="area-vision-results" style="display:none;">
+				<!-- Results Area -->
+				<div id="area-vision-results" class="rs-vision-results" style="display:none;">
 					<div class="pseo-field style-field">
 						<label for="in-art-style">سبک هنری (از تصویر)</label>
-						<input type="text" id="in-art-style">
+						<input type="text" id="in-art-style" name="rs_vision[art_style]">
 					</div>
 					<div class="pseo-field visual-tags-field">
 						<label for="in-visual-tags">تگ‌های بصری (از تصویر)</label>
-						<input type="text" id="in-visual-tags">
+						<input type="text" id="in-visual-tags" name="rs_vision[visual_tags]">
 					</div>
 					<div class="pseo-field">
 						<label for="in-alt-vision">متن Alt پیشنهادی (از تصویر)</label>
-						<input type="text" id="in-alt-vision">
+						<input type="text" id="in-alt-vision" name="rs_vision[vision_alt]">
 					</div>
 				</div>
 			</div>
@@ -112,46 +150,54 @@ class ReadyStudio_Module_Vision {
 	}
 
 	/**
-	 * 4. مدیریت درخواست AJAX برای تحلیل بصری
+	 * 4. Handles the AJAX request for the "Visual Analysis" button.
+	 * Fired by 'wp_ajax_rs_generate_vision' hook.
 	 */
-	public function handle_ajax_generate_vision() {
-		check_ajax_referer( 'rs_nonce_action', 'nonce' );
-		$post_id = intval( $_POST['post_id'] );
-		
-		if ( ! $post_id ) {
-			wp_send_json_error( 'ID پست نامعتبر است.' );
+	public function ajax_handle_generate() {
+		// Security checks
+		if ( ! check_ajax_referer( 'rs_nonce_action', 'nonce', false ) ) {
+			wp_send_json_error( 'Invalid security token.' );
 			return;
 		}
-		
-		// فراخوانی مغز هوش مصنوعی (Vision)
-		$this->call_gemini_vision( $post_id );
+		$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( 'Permission denied.' );
+			return;
+		}
+
+		// 1. Get Image Data (Base64)
+		$image_data = self::get_image_data( $post_id );
+		if ( is_wp_error( $image_data ) ) {
+			wp_send_json_error( $image_data->get_error_message() );
+			return;
+		}
+
+		// 2. Build the task prompt
+		$task_prompt = self::get_task_prompt();
+
+		// 3. Call the Core API (Nexus Brain) - Vision function
+		$response = $this->api->call_gemini_vision(
+			$task_prompt,
+			$image_data['base64'],
+			$image_data['mime_type']
+		);
+
+		// 4. Send response back to JavaScript
+		if ( is_wp_error( $response ) ) {
+			wp_send_json_error( $response->get_error_message() );
+		} else {
+			wp_send_json_success( $response );
+		}
 	}
 
 	/**
-	 * 5. مغز هوش مصنوعی (Vision)
-	 * این تابع تصویر را به Gemini Vision ارسال می‌کند.
+	 * Static helper to get the task prompt for Vision.
+	 * Also used by Bulk Generator.
+	 *
+	 * @return string The task prompt.
 	 */
-	private function call_gemini_vision( $post_id ) {
-		$opts = $this->options;
-
-		// --- 1. دریافت تصویر (Encode Base64) ---
-		$thumbnail_id = get_post_thumbnail_id( $post_id );
-		if ( ! $thumbnail_id ) {
-			wp_send_json_error( 'تصویر شاخص یافت نشد.' );
-			return;
-		}
-		
-		$image_path = get_attached_file( $thumbnail_id );
-		if ( ! $image_path || ! file_exists( $image_path ) ) {
-			wp_send_json_error( 'فایل تصویر شاخص در سرور یافت نشد.' );
-			return;
-		}
-
-		$image_data = base64_encode( file_get_contents( $image_path ) );
-		$mime_type = get_post_mime_type( $thumbnail_id );
-
-		// --- 2. ساخت پرامپت (Vision) ---
-		$system_prompt = "
+	public static function get_task_prompt() {
+		return "
         You are a world-class Art Director and SEO specialist.
         Analyze this image and return ONLY a JSON object.
         Your analysis must be in Persian (فارسی).
@@ -168,61 +214,42 @@ class ReadyStudio_Module_Vision {
           \"alt_text\": \"...\"
         }
         ";
-
-		// --- 3. آماده‌سازی Payload برای ورکر ---
-		$worker_url = isset( $opts['worker_url'] ) ? $opts['worker_url'] : '';
-		$api_key = isset( $opts['api_key'] ) ? $opts['api_key'] : '';
-		// مدل‌های Vision-capable
-		$model_name = 'gemini-1.5-flash'; // یا 'gemini-pro-vision'
-
-		if ( empty( $worker_url ) || empty( $api_key ) ) {
-			wp_send_json_error( 'تنظیمات API کامل نیست.' );
-			return;
-		}
-
-		$payload = [
-			'action_type' => 'vision', // <-- این به ورکر می‌گوید که با تصویر کار کند
-			'api_key' => $api_key,
-			'model_name' => $model_name,
-			'system_prompt' => $system_prompt,
-			'image_data' => $image_data,
-			'mime_type' => $mime_type
-		];
-
-		// --- 4. ارسال به ورکر ---
-		$response = wp_remote_post( $worker_url, [
-			'body' => json_encode( $payload ),
-			'headers' => [ 'Content-Type' => 'application/json' ],
-			'timeout' => 90, // Vision-models might take longer
-			'sslverify' => false
-		] );
-
-		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( 'Worker Error: ' . $response->get_error_message() );
-			return;
-		}
-		
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		
-		if ( isset( $body['candidates'][0]['content']['parts'][0]['text'] ) ) {
-			$json_data = json_decode( $body['candidates'][0]['content']['parts'][0]['text'], true );
-			
-			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				wp_send_json_error( 'AI returned invalid JSON.' );
-				return;
-			}
-			wp_send_json_success( $json_data );
-
-		} else {
-			$error_message = isset( $body['error']['message'] ) ? $body['error']['message'] : 'Unknown AI Error';
-			wp_send_json_error( 'AI API Error: ' . $error_message );
-		}
 	}
 
-} // پایان کلاس ReadyStudio_Module_Vision
+	/**
+	 * Static helper to get the Base64 data of the featured image.
+	 * Also used by Bulk Generator.
+	 *
+	 * @param int $post_id The post ID.
+	 * @return array|WP_Error Array of [base64, mime_type] or WP_Error.
+	 */
+	public static function get_image_data( $post_id ) {
+		$thumbnail_id = get_post_thumbnail_id( $post_id );
+		if ( ! $thumbnail_id ) {
+			return new WP_Error( 'no_thumbnail', 'تصویر شاخص یافت نشد.' );
+		}
+		
+		$image_path = get_attached_file( $thumbnail_id );
+		if ( ! $image_path || ! file_exists( $image_path ) ) {
+			return new WP_Error( 'file_not_found', 'فایل تصویر شاخص در سرور یافت نشد.' );
+		}
 
-// --- این ماژول را به هسته متصل کن ---
-// هسته افزونه (ReadyStudio_Core_V12) این فایل را include می‌کند
-// و این خط، ماژول را فعال می‌سازد.
-new ReadyStudio_Module_Vision();
-?>
+		$image_data = base64_encode( file_get_contents( $image_path ) );
+		$mime_type = get_post_mime_type( $thumbnail_id );
+
+		if ( empty( $image_data ) || empty( $mime_type ) ) {
+			return new WP_Error( 'read_error', 'خطا در خواندن فایل تصویر.' );
+		}
+
+		return [
+			'base64'    => $image_data,
+			'mime_type' => $mime_type,
+		];
+	}
+
+} // End class ReadyStudio_Module_Vision
+
+// Instantiate the module by hooking into the core loader
+add_action( 'rs_core_loaded', function( $core_loader ) {
+	new ReadyStudio_Module_Vision( $core_loader );
+} );
