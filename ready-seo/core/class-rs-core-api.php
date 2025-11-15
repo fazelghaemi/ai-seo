@@ -2,12 +2,11 @@
 /**
  * Ready Studio SEO Engine - Core API (The Nexus Brain)
  *
- * This class handles ALL communication with the Cloudflare Worker
- * and, by extension, the Google Gemini API.
- * It's the "AI Brain" of the plugin, formatting prompts and parsing responses.
+ * v12.1: Fixed a critical Parse Error (syntax error) in the
+ * call_gemini_text function on line 165 (extra single quote).
  *
  * @package   ReadyStudio
- * @version   12.0.0
+ * @version   12.1.0
  * @author    Fazel Ghaemi
  */
 
@@ -153,7 +152,10 @@ class ReadyStudio_Core_API {
 		} else {
 			// AI returned an error (e.g., safety settings, 404)
 			$error_message = isset( $response['error']['message'] ) ? $response['error']['message'] : 'خطای ناشناخته از Gemini API';
-			return new WP_Error( 'ai_api_error', 'AI API Error: ' ' . $error_message );
+			
+			// *** THIS IS THE FIX (Line 165 area) ***
+			// Removed the extra single quote
+			return new WP_Error( 'ai_api_error', 'AI API Error: ' . $error_message );
 		}
 	}
 

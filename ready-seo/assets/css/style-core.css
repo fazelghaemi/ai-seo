@@ -1,26 +1,21 @@
 /*
- * Ready Studio SEO Engine - Core Styles (v12.0)
+ * Ready Studio SEO Engine - Core Styles (v12.1 - Branding Update)
  *
- * This file styles the main admin pages:
- * 1. Settings (API & AI Brain)
- * 2. Bulk Generator
- *
- * It uses CSS variables defined here, which are also
- * inherited by other stylesheets.
+ * This file styles the main admin pages (Settings, Bulk)
+ * and defines the new "Ready Studio" brand color palette.
+ * v12.1: Updated button styles to be "curved" and "thicker" (Google M3 style).
  */
 
-/* --- 1. Root & CSS Variables --- */
+/* --- 1. Root & CSS Variables (NEW BRANDING) --- */
 :root {
 	/* Ready Studio Brand Palette */
-	--rs-primary: #010101; /* سرمه‌ای اصلی برند */
-	--rs-accent: #01ada1; /* سرخابی جیغ برند */
-	--rs-accent-hover: #01a398;
+	--rs-primary: #010101; /* مشکی میدنایت */
+	--rs-accent: #01ada1; /* سبز aqua mint */
+	--rs-hover: #009086; /* سبز هاور */
 
-	/* Google Material Palette */
-	--g-blue: #1a73e8; /* آبی اصلی گوگل */
-	--g-blue-hover: #1765cc;
+	/* Google Material Palette (for UI elements) */
+	--g-blue: #01ada1; /* (برای دکمه‌های Generate) */
 	--g-green: #1e8e3e; /* سبز موفقیت */
-	--g-yellow: #f9ab00; /* زرد هشدار */
 	--g-red: #d93025; /* قرمز خطا */
 	--g-bg: #f8f9fa; /* پس‌زمینه خیلی روشن */
 	--g-border: #e8eaed; /* جداکننده‌ها */
@@ -29,7 +24,8 @@
 	--g-white: #ffffff;
 
 	/* UI Metrics */
-	--rs-radius: 8px; /* گوشه‌های گرد مدرن */
+	--rs-radius-modern: 20px; /* NEW: "Curve" style for buttons */
+	--rs-radius-standard: 8px; /* Standard radius for cards */
 	--rs-shadow-1: 0 1px 2px 0 rgba(60, 64, 67, 0.15),
 		0 1px 3px 1px rgba(60, 64, 67, 0.1);
 	--rs-shadow-2: 0 4px 8px 3px rgba(60, 64, 67, 0.1),
@@ -54,7 +50,7 @@
 /* --- 3. Admin Page Wrapper (Settings & Bulk) --- */
 .rs-wrap {
 	background: var(--g-bg);
-	border-radius: var(--rs-radius);
+	border-radius: var(--rs-radius-standard);
 	padding: 0;
 	box-shadow: none;
 	margin-top: 20px;
@@ -62,7 +58,7 @@
 	overflow: hidden;
 }
 
-/* Header Branding */
+/* Header Branding (NEW LOGO) */
 .rs-header {
 	background: var(--g-white);
 	padding: 20px 24px;
@@ -75,37 +71,38 @@
 .rs-header h1 {
 	font-size: 20px;
 	font-weight: 700;
-	color: var(--rs-primary); /* رنگ اصلی برند */
+	color: var(--rs-primary); /* New Black */
 	margin: 0;
 	display: flex;
 	align-items: center;
 	gap: 12px;
 }
 
+/* Logo from assets/logo/aiseo-logo.svg */
 .rs-header h1::before {
 	content: "";
 	display: block;
 	width: 28px;
 	height: 28px;
-	/* گرادیانت زیبای برند */
-	background: linear-gradient(135deg, var(--rs-primary) 0%, var(--rs-accent) 100%);
+	background: url('../logo/aiseo-logo.svg') no-repeat center center;
+	background-size: contain;
 	border-radius: 6px;
-	box-shadow: var(--rs-shadow-1);
+}
+
+.rs-header h1 .rs-brand-family {
+	font-size: 12px;
+	color: var(--g-text-light);
+	font-weight: 500;
+	border-right: 1px solid var(--g-border);
+	padding-right: 10px;
+	margin-right: 2px;
 }
 
 .rs-header form {
 	margin: 0 !important;
 }
 
-.rs-header select {
-	min-width: 150px;
-	font-size: 13px;
-	padding: 5px 8px;
-	border-radius: 4px;
-	border: 1px solid var(--g-border);
-}
-
-/* --- 4. Tab Navigation (Shared) --- */
+/* --- 4. Tab Navigation (NEW COLORS) --- */
 .rs-tabs {
 	display: flex;
 	background: var(--g-white);
@@ -118,7 +115,7 @@
 	font-weight: 500;
 	color: var(--g-text-light);
 	padding: 10px 16px;
-	margin-bottom: -1px; /* برای همپوشانی با border */
+	margin-bottom: -1px;
 	border-bottom: 2px solid transparent;
 	text-decoration: none;
 	transition: all 0.2s ease;
@@ -128,13 +125,13 @@
 }
 
 .rs-tab-link:hover {
-	color: var(--g-text-dark);
+	color: var(--rs-primary); /* New Black */
 	background: var(--g-bg);
 }
 
 .rs-tab-link.active {
-	color: var(--rs-primary); /* رنگ اصلی برند */
-	border-bottom-color: var(--rs-primary); /* رنگ اصلی برند */
+	color: var(--rs-accent); /* New Mint */
+	border-bottom-color: var(--rs-accent); /* New Mint */
 	font-weight: 600;
 }
 
@@ -149,35 +146,21 @@
 }
 
 @keyframes fadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(5px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
+	from { opacity: 0; transform: translateY(5px); }
+	to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- 5. Form Elements (Shared) --- */
-.rs-wrap .form-table {
-	margin: 0;
-}
+/* --- 5. Form Elements (NEW COLORS) --- */
+.rs-wrap .form-table { margin: 0; }
 .rs-wrap .form-table th {
 	padding: 15px 10px 15px 0;
 	width: 200px;
 	font-weight: 500;
 	color: var(--g-text-dark);
 }
-.rs-wrap .form-table td {
-	padding: 8px 10px;
-}
+.rs-wrap .form-table td { padding: 8px 10px; }
 
-.pseo-field {
-	margin-bottom: 12px;
-	position: relative;
-}
-
+.pseo-field { margin-bottom: 12px; position: relative; }
 .pseo-field label {
 	display: block;
 	font-size: 13px;
@@ -195,21 +178,18 @@
 	padding: 8px 12px;
 	font-size: 13px;
 	border: 1px solid var(--g-border);
-	border-radius: 4px;
+	border-radius: var(--rs-radius-standard); /* 8px for fields */
 	background-color: #fff;
 	color: var(--g-text-dark);
 	transition: all 0.2s ease-in-out;
 	box-shadow: none;
 }
-.pseo-field .regular-text {
-	width: 100%;
-	max-width: 400px;
-}
+.pseo-field .regular-text { max-width: 400px; }
 
 .pseo-field input:focus,
 .pseo-field textarea:focus {
-	border-color: var(--g-blue);
-	box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+	border-color: var(--rs-accent); /* New Mint */
+	box-shadow: 0 0 0 2px rgba(1, 173, 161, 0.2);
 	outline: none;
 }
 
@@ -232,14 +212,14 @@
 	max-width: 600px;
 }
 
-/* --- 7. Buttons (Shared) --- */
+/* --- 7. Buttons (NEW "CURVE" UIX) --- */
 .pseo-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	width: 100%;
-	padding: 10px 16px;
-	border-radius: var(--rs-radius);
+	padding: 10px 24px; /* "Thicker" padding */
+	border-radius: var(--rs-radius-modern); /* "Curve" style */
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
@@ -261,35 +241,36 @@
 	box-shadow: var(--rs-shadow-2);
 }
 
-/* Primary Button (Google Blue / Generate) */
-.btn-primary,
+/* Generate Button (Brand Accent) */
 .btn-generate {
-	background-color: var(--g-blue);
+	background-color: var(--rs-accent); /* New Mint */
 	color: var(--g-white);
 }
-.btn-primary:hover:not(:disabled),
 .btn-generate:hover:not(:disabled) {
-	background-color: var(--g-blue-hover);
+	background-color: var(--rs-hover); /* New Mint Hover */
 }
-/* Save Button (Ready Studio Accent) */
+/* Save Button (Brand Primary) */
 .btn-save {
-	background-color: var(--rs-accent); /* رنگ برند */
+	background-color: var(--rs-primary); /* New Black */
 	color: var(--g-white);
 	margin-top: 12px;
 }
 .btn-save:hover:not(:disabled) {
-	background-color: var(--rs-accent-hover);
+	background-color: #333; /* Darken black */
 }
-/* Magic Button (Ready Studio Primary) */
-.btn-magic {
-	background-color: var(--rs-primary); /* رنگ برند */
+/* Magic/Blue Button (Kept for visual distinction) */
+.btn-magic,
+.btn-primary {
+	background-color: var(--g-blue);
 	color: var(--g-white);
 }
-.btn-magic:hover:not(:disabled) {
-	background-color: #2a3c50;
+.btn-magic:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+	background-color: var(--g-blue-hover);
 }
 
-/* --- 8. Bulk Generator Page --- */
+
+/* --- 8. Bulk Generator Page (NEW COLORS) --- */
 .rs-control-panel {
 	background: var(--g-white);
 	padding: 16px 24px;
@@ -302,7 +283,7 @@
 .rs-label-title {
 	font-weight: 600;
 	font-size: 13px;
-	color: var(--rs-primary);
+	color: var(--rs-primary); /* New Black */
 }
 .rs-control-group {
 	display: flex;
@@ -313,7 +294,7 @@
 }
 .rs-control-group input[type="checkbox"] {
 	margin: 0;
-	accent-color: var(--rs-primary);
+	accent-color: var(--rs-accent); /* New Mint */
 }
 .rs-divider {
 	width: 1px;
@@ -327,12 +308,11 @@
 	border-bottom: 1px solid var(--g-border);
 }
 
-/* Progress Bar */
+/* Progress Bar (NEW COLORS) */
 #rs-progress-bar {
 	width: 0%;
 	height: 5px;
-	/* گرادیانت زیبای برند */
-	background: linear-gradient(90deg, var(--g-blue), var(--rs-accent));
+	background: linear-gradient(90deg, var(--rs-primary), var(--rs-accent)); /* Black to Mint */
 	transition: width 0.4s ease;
 }
 
@@ -348,7 +328,7 @@
 	font-size: 12px;
 	line-height: 1.6;
 	display: none;
-	direction: ltr; /* لاگ باید چپ‌چین باشد */
+	direction: ltr; /* Log should be LTR */
 	text-align: left;
 }
 .rs-log-box div {
@@ -360,7 +340,7 @@
 .status-badge {
 	display: inline-block;
 	padding: 4px 10px;
-	border-radius: 12px; /* Pill shape */
+	border-radius: 12px;
 	font-size: 11px;
 	font-weight: 500;
 	letter-spacing: 0.5px;
@@ -374,15 +354,14 @@
 	color: #b06000;
 }
 
-/* --- 9. Loaders (Shared) --- */
+/* --- 9. Loaders (NEW COLORS) --- */
 .spinner-rs {
 	width: 28px;
 	height: 28px;
 	border: 3px solid rgba(0, 0, 0, 0.1);
 	border-radius: 50%;
-	/* گرادیانت برند روی لودر */
-	border-top-color: var(--rs-primary);
-	border-left-color: var(--rs-accent);
+	border-top-color: var(--rs-primary); /* New Black */
+	border-left-color: var(--rs-accent); /* New Mint */
 	animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 	margin: 15px auto;
 }

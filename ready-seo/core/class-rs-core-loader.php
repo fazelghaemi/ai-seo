@@ -2,11 +2,11 @@
 /**
  * Ready Studio SEO Engine - Core Loader
  *
- * This is the main singleton class that initializes the entire plugin.
- * It loads core components, assets, and all available modules.
+ * v12.3: CRITICAL FIX - Injects the Core API into the Core Settings
+ * class constructor to prevent an ArgumentCountError (Fatal Error).
  *
  * @package   ReadyStudio
- * @version   12.0.0
+ * @version   12.3.0
  * @author    Fazel Ghaemi
  */
 
@@ -113,6 +113,8 @@ final class ReadyStudio_Core_Loader {
 
 	/**
 	 * 3. Instantiates the core components and injects dependencies.
+	 *
+	 * *** THIS FUNCTION CONTAINS THE FIX ***
 	 */
 	private function init_core_components() {
 		// Make API and Data helpers available globally via the loader instance
@@ -125,8 +127,11 @@ final class ReadyStudio_Core_Loader {
 		
 		// Initialize other core components
 		if ( class_exists( 'ReadyStudio_Core_Settings' ) ) {
-			// Settings page just needs the options
-			new ReadyStudio_Core_Settings( $this->options );
+			// *** FATAL ERROR FIX ***
+			// The constructor for Settings (v12.3) now requires
+			// both $options AND $api (for the test button).
+			// We must pass both dependencies.
+			new ReadyStudio_Core_Settings( $this->options, $this->api );
 		}
 		if ( class_exists( 'ReadyStudio_Core_Bulk' ) ) {
 			// Bulk page needs API and Data helpers
@@ -178,7 +183,7 @@ final class ReadyStudio_Core_Loader {
 				RS_SEO_VERSION
 			);
 			
-			// 2. Core JS for admin pages (Settings tabs, Bulk logic)
+			// 2. Core JS for admin pages (Settings tabs, Bulk logic, Test Button)
 			wp_enqueue_script(
 				'rs-admin-core-js',
 				RS_SEO_URL . 'assets/js/admin-core.js',
@@ -188,7 +193,7 @@ final class ReadyStudio_Core_Loader {
 			);
 		}
 		
-		// --- B. Load on Post Edit Screens ---
+		// --- B. Load on Post Edit Screens (post.php, post-new.php) ---
 		if ( $hook === 'post.php' || $hook === 'post-new.php' ) {
 			
 			// 1. Core (global) styles. Must load first for CSS variables.
@@ -215,13 +220,6 @@ final class ReadyStudio_Core_Loader {
 				RS_SEO_VERSION,
 				true // Load in footer
 			);
-			
-			// 4. Pass critical data from PHP to our Metabox JS
-			wp_localize_script( 'rs-metabox-core-js', 'rs_metabox_config', [
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'post_id'  => get_the_ID(),
-				'nonce'    => wp_create_nonce( 'rs_nonce_action' ), // A single nonce for all metabox actions
-			] );
 		}
 	}
 
@@ -233,7 +231,7 @@ final class ReadyStudio_Core_Loader {
 	private function admin_critical_error( $message ) {
 		add_action( 'admin_notices', function() use ( $message ) {
 			echo '<div class="error"><p>';
-			echo '<strong>خطای فاجعه‌بار افزونه Ready Studio SEO:</strong><br>';
+			echo '<strong>خطای فاجعه‌بار افزونه AI SEO:</strong><br>';
 			echo esc_html( $message );
 			echo '</p></div>';
 		});

@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name:       Ready Studio SEO Engine
+ * Plugin Name:       AI SEO
  * Plugin URI:        https://github.com/fazelghaemi/ai-seo
- * Description:       The ultimate AI-powered SEO & Content Engine for WordPress, featuring a modular architecture, AI Brain, and direct integration with Google Gemini via Cloudflare Workers.
- * Version:           12.0.0
+ * Description:       The ultimate AI-powered SEO & Content Engine for WordPress, featuring a modular architecture, AI Brain, and direct integration with Google Gemini via Cloudflare Workers. A Ready Studio product.
+ * Version:           12.1.0
  * Author:            Ready Studio (Fazel Ghaemi)
  * Author URI:        https://readystudio.ir
  * Requires PHP:      7.4
- * Text Domain:       ready-seo
+ * Text Domain:       ai-seo
  * Domain Path:       /lang
  *
- * @package           ReadyStudio
+ * @package           AISEO
  * @author            Fazel Ghaemi
  * @copyright         2024 Ready Studio
  */
@@ -19,13 +19,11 @@
 defined( 'ABSPATH' ) or die( 'Unauthorized Access.' );
 
 /**
- * Version 12.0.0 (Nexus Core - Modular)
+ * Version 12.1.0 (Branding Update)
  *
  * This file is the main plugin bootloader.
  * Its *only* responsibility is to define constants,
  * load the Core Loader, and instantiate the plugin.
- *
- * All logic is handled by the Core Loader and subsequent modules.
  */
 
 // --- 1. Define Core Constants ---
@@ -34,7 +32,7 @@ if ( ! defined( 'RS_SEO_VERSION' ) ) {
 	/**
 	 * Plugin version.
 	 */
-	define( 'RS_SEO_VERSION', '12.0.0' );
+	define( 'RS_SEO_VERSION', '12.1.0' );
 }
 
 if ( ! defined( 'RS_SEO_PATH' ) ) {
@@ -77,7 +75,7 @@ if ( ! file_exists( $core_loader_file ) ) {
 	if ( is_admin() ) {
 		add_action( 'admin_notices', function() {
 			echo '<div class="error"><p>';
-			echo '<strong>خطای فاجعه‌بار افزونه Ready Studio SEO:</strong> فایل بارگذار هسته (Core Loader) یافت نشد.';
+			echo '<strong>خطای فاجعه‌بار افزونه AI SEO:</strong> فایل بارگذار هسته (Core Loader) یافت نشد.';
 			echo '<br><code>' . esc_html( $core_loader_file ) . '</code>';
 			echo '</p></div>';
 		});
