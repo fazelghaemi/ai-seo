@@ -1,11 +1,20 @@
 /*
- * Ready Studio SEO Engine - Core Styles (v12.3 - Branding Update)
+ * Ready Studio SEO Engine - Core Styles (v13.1 - Font Update)
  *
- * v12.3: Re-styled .btn-primary to use brand colors (Black)
- * v12.1: Updated button styles to be "curved" and "thicker" (Google M3 style).
+ * v13.1: Added custom font "ReadyFont" (Yekan Bakh).
+ * v12.3: Re-styled .btn-primary to use brand colors (Black).
  */
 
-/* --- 1. Root & CSS Variables (NEW BRANDING) --- */
+/* --- 1. NEW: Font Face Definition --- */
+@font-face {
+	font-family: 'ReadyFont';
+	src: url('../font/readyfont.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* --- 2. Root & CSS Variables (NEW FONT) --- */
 :root {
 	/* Ready Studio Brand Palette */
 	--rs-primary: #010101; /* مشکی میدنایت */
@@ -13,14 +22,14 @@
 	--rs-hover: #009086; /* سبز هاور */
 	--rs-primary-hover: #333333; /* هاور مشکی */
 
-	/* Google Material Palette (for UI elements) */
-	--g-blue: #1a73e8; /* (برای دکمه‌های خاص) */
-	--g-green: #1e8e3e; /* سبز موفقیت */
-	--g-red: #d93025; /* قرمز خطا */
-	--g-bg: #f8f9fa; /* پس‌زمینه خیلی روشن */
-	--g-border: #e8eaed; /* جداکننده‌ها */
-	--g-text-light: #5f6368; /* متن ثانویه */
-	--g-text-dark: #202124; /* متن اصلی */
+	/* Google Material Palette */
+	--g-blue: #1a73e8;
+	--g-green: #1e8e3e;
+	--g-red: #d93025;
+	--g-bg: #f8f9fa;
+	--g-border: #e8eaed;
+	--g-text-light: #5f6368;
+	--g-text-dark: #202124;
 	--g-white: #ffffff;
 
 	/* UI Metrics */
@@ -30,13 +39,17 @@
 		0 1px 3px 1px rgba(60, 64, 67, 0.1);
 	--rs-shadow-2: 0 4px 8px 3px rgba(60, 64, 67, 0.1),
 		0 1px 3px rgba(60, 64, 67, 0.15);
-	--rs-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
+	
+	/* --- UPDATED FONT STACK --- */
+	--rs-font: 'ReadyFont', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
 		Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	--rs-font-code: 'Consolas', 'Monaco', monospace; /* Monospace for code/logs */
 }
 
-/* --- 2. Global & Typography --- */
-.rs-wrap {
-	font-family: var(--rs-font);
+/* --- 3. Global & Typography --- */
+.rs-wrap,
+#promptseo-app {
+	font-family: var(--rs-font); /* Apply new font */
 	color: var(--g-text-dark);
 	box-sizing: border-box;
 	direction: rtl;
@@ -47,7 +60,7 @@
 	box-sizing: border-box;
 }
 
-/* --- 3. Admin Page Wrapper (Settings & Bulk) --- */
+/* --- 4. Admin Page Wrapper (Settings & Bulk) --- */
 .rs-wrap {
 	background: var(--g-bg);
 	border-radius: var(--rs-radius-standard);
@@ -58,7 +71,7 @@
 	overflow: hidden;
 }
 
-/* Header Branding (NEW LOGO) */
+/* Header Branding (Logo) */
 .rs-header {
 	background: var(--g-white);
 	padding: 20px 24px;
@@ -71,7 +84,7 @@
 .rs-header h1 {
 	font-size: 20px;
 	font-weight: 700;
-	color: var(--rs-primary); /* New Black */
+	color: var(--rs-primary);
 	margin: 0;
 	display: flex;
 	align-items: center;
@@ -102,7 +115,7 @@
 	margin: 0 !important;
 }
 
-/* --- 4. Tab Navigation (NEW COLORS) --- */
+/* --- 5. Tab Navigation --- */
 .rs-tabs {
 	display: flex;
 	background: var(--g-white);
@@ -125,13 +138,13 @@
 }
 
 .rs-tab-link:hover {
-	color: var(--rs-primary); /* New Black */
+	color: var(--rs-primary);
 	background: var(--g-bg);
 }
 
 .rs-tab-link.active {
-	color: var(--rs-accent); /* New Mint */
-	border-bottom-color: var(--rs-accent); /* New Mint */
+	color: var(--rs-accent);
+	border-bottom-color: var(--rs-accent);
 	font-weight: 600;
 }
 
@@ -150,7 +163,7 @@
 	to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- 5. Form Elements (NEW COLORS) --- */
+/* --- 6. Form Elements --- */
 .rs-wrap .form-table { margin: 0; }
 .rs-wrap .form-table th {
 	padding: 15px 10px 15px 0;
@@ -178,27 +191,28 @@
 	padding: 8px 12px;
 	font-size: 13px;
 	border: 1px solid var(--g-border);
-	border-radius: var(--rs-radius-standard); /* 8px for fields */
+	border-radius: var(--rs-radius-standard);
 	background-color: #fff;
 	color: var(--g-text-dark);
 	transition: all 0.2s ease-in-out;
 	box-shadow: none;
+	font-family: var(--rs-font); /* Apply font to inputs */
 }
 .pseo-field .regular-text { max-width: 400px; }
 
 .pseo-field input:focus,
 .pseo-field textarea:focus {
-	border-color: var(--rs-accent); /* New Mint */
+	border-color: var(--rs-accent);
 	box-shadow: 0 0 0 2px rgba(1, 173, 161, 0.2);
 	outline: none;
 }
 
-/* --- 6. AI Brain (Settings Page) --- */
+/* --- 7. AI Brain & Code Textareas --- */
 .ai-brain-textarea {
 	width: 100% !important;
 	max-width: 600px;
 	height: 150px;
-	font-family: monospace;
+	font-family: var(--rs-font-code); /* Use Code Font */
 	direction: ltr;
 	text-align: left;
 	background: var(--g-bg);
@@ -212,14 +226,14 @@
 	max-width: 600px;
 }
 
-/* --- 7. Buttons (NEW "CURVE" UIX & BRANDING) --- */
+/* --- 8. Buttons --- */
 .pseo-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	width: 100%;
-	padding: 10px 24px; /* "Thicker" padding */
-	border-radius: var(--rs-radius-modern); /* "Curve" style */
+	padding: 10px 24px;
+	border-radius: var(--rs-radius-modern);
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
@@ -228,6 +242,7 @@
 	text-decoration: none;
 	gap: 6px;
 	box-shadow: var(--rs-shadow-1);
+	font-family: var(--rs-font); /* Apply font to buttons */
 }
 .pseo-btn:disabled {
 	background-color: var(--g-border);
@@ -241,28 +256,24 @@
 	box-shadow: var(--rs-shadow-2);
 }
 
-/* Generate Button (Brand Accent) */
 .btn-generate {
-	background-color: var(--rs-accent); /* New Mint */
+	background-color: var(--rs-accent);
 	color: var(--g-white);
 }
 .btn-generate:hover:not(:disabled) {
-	background-color: var(--rs-hover); /* New Mint Hover */
+	background-color: var(--rs-hover);
 }
 
-/* Save / Primary Button (Brand Primary) */
-/* This now styles .btn-save AND .btn-primary */
 .btn-save,
 .btn-primary {
-	background-color: var(--rs-primary); /* New Black */
+	background-color: var(--rs-primary);
 	color: var(--g-white);
 }
 .btn-save:hover:not(:disabled),
 .btn-primary:hover:not(:disabled) {
-	background-color: var(--rs-primary-hover); /* New Black Hover */
+	background-color: var(--rs-primary-hover);
 }
 
-/* Magic Button (Distinct Color) */
 .btn-magic {
 	background-color: var(--g-blue);
 	color: var(--g-white);
@@ -272,7 +283,7 @@
 }
 
 
-/* --- 8. Bulk Generator Page (NEW COLORS) --- */
+/* --- 9. Bulk Generator Page --- */
 .rs-control-panel {
 	background: var(--g-white);
 	padding: 16px 24px;
@@ -285,7 +296,7 @@
 .rs-label-title {
 	font-weight: 600;
 	font-size: 13px;
-	color: var(--rs-primary); /* New Black */
+	color: var(--rs-primary);
 }
 .rs-control-group {
 	display: flex;
@@ -296,7 +307,7 @@
 }
 .rs-control-group input[type="checkbox"] {
 	margin: 0;
-	accent-color: var(--rs-accent); /* New Mint */
+	accent-color: var(--rs-accent);
 }
 .rs-divider {
 	width: 1px;
@@ -310,27 +321,27 @@
 	border-bottom: 1px solid var(--g-border);
 }
 
-/* Progress Bar (NEW COLORS) */
+/* Progress Bar */
 #rs-progress-bar {
 	width: 0%;
 	height: 5px;
-	background: linear-gradient(90deg, var(--rs-primary), var(--rs-accent)); /* Black to Mint */
+	background: linear-gradient(90deg, var(--rs-primary), var(--rs-accent));
 	transition: width 0.4s ease;
 }
 
 /* Log Console */
 .rs-log-box {
 	margin: 0;
-	background: #1e1e1e; /* Dark terminal */
+	background: #1e1e1e;
 	color: #d4d4d4;
-	font-family: "Consolas", "Monaco", monospace;
+	font-family: var(--rs-font-code); /* Use Code Font */
 	padding: 16px;
 	height: 300px;
 	overflow-y: auto;
 	font-size: 12px;
 	line-height: 1.6;
 	display: none;
-	direction: ltr; /* Log should be LTR */
+	direction: ltr;
 	text-align: left;
 }
 .rs-log-box div {
@@ -356,14 +367,14 @@
 	color: #b06000;
 }
 
-/* --- 9. Loaders (NEW COLORS) --- */
+/* --- 10. Loaders --- */
 .spinner-rs {
 	width: 28px;
 	height: 28px;
 	border: 3px solid rgba(0, 0, 0, 0.1);
 	border-radius: 50%;
-	border-top-color: var(--rs-primary); /* New Black */
-	border-left-color: var(--rs-accent); /* New Mint */
+	border-top-color: var(--rs-primary);
+	border-left-color: var(--rs-accent);
 	animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 	margin: 15px auto;
 }
@@ -372,6 +383,47 @@
 	to {
 		transform: rotate(360deg);
 	}
+}
+
+/* --- 11. Toggle Switch --- */
+.rs-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+.rs-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.rs-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.rs-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .rs-toggle-slider {
+    background-color: var(--rs-accent);
+}
+input:checked + .rs-toggle-slider:before {
+    transform: translateX(20px);
 }
 
 /*
