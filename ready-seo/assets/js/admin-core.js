@@ -6,11 +6,13 @@
 jQuery(document).ready(function ($) {
 	
 	// --- 1. Settings Page Tab Switching ---
-	var $settingsTabs = $('.rs-tabs .rs-tab-link');
-	if ($settingsTabs.length) {
+	var $settingsPage = $('.rs-wrap.settings-page'); // Target only settings page
+	if ($settingsPage.length) {
+		var $settingsTabs = $settingsPage.find('.rs-tabs .rs-tab-link');
+		
 		$settingsTabs.click(function (e) {
 			e.preventDefault();
-			var targetTab = $(this).data('tab');
+			var targetTab = $(this).data('tab'); // Get tab ID from data-tab attribute
 			if (!targetTab) return;
 
 			// Update tabs
@@ -18,27 +20,35 @@ jQuery(document).ready(function ($) {
 			$(this).addClass('active');
 
 			// Update content
-			$('.rs-tab-content').removeClass('active');
+			$settingsPage.find('.rs-tab-content').removeClass('active');
 			$('#' + targetTab).addClass('active');
 
-			// Update URL hash for deep linking (optional)
-			// window.location.hash = targetTab;
+			// Update URL for deep linking
+			var newUrl = window.location.href.split('?')[0] + '?page=promptseo_dashboard&tab=' + targetTab;
+			window.history.pushState({ path: newUrl }, '', newUrl);
 		});
 		
-		// Activate tab from hash on page load
-		// if(window.location.hash) {
-		// 	$('a[href="' + window.location.hash + '"]').click();
-		// }
+		// Activate tab from URL parameter on page load
+		var urlParams = new URLSearchParams(window.location.search);
+		var activeTab = urlParams.get('tab') || 'api'; // Default to 'api'
+		$settingsPage.find('.rs-tab-link[data-tab="' + activeTab + '"]').click();
 	}
 
 	// --- 2. Bulk Generator Logic ---
-	var $bulkStartBtn = $('#rs-bulk-start');
-	if ($bulkStartBtn.length) {
+	var $bulkPage = $('.rs-wrap.bulk-page'); // Target only bulk page
+	if ($bulkPage.length) {
 		
+		var $bulkStartBtn = $('#rs-bulk-start');
+		var $logBox = $('#rs-log');
+		var $progressBar = $('#rs-progress-bar');
+		var nonce = $('#rs_bulk_nonce').val(); // Get nonce from hidden field
+
+		// Select/Deselect all posts
 		$('#cb-select-all-1').click(function () {
 			$('.rs-bulk-check').prop('checked', this.checked);
 		});
 
+		// Start button click handler
 		$bulkStartBtn.click(function () {
 			var selected_ids = [];
 			$('.rs-bulk-check:checked').each(function () {
@@ -50,6 +60,7 @@ jQuery(document).ready(function ($) {
 				return;
 			}
 
+			// Get all selected options from checkboxes
 			var gen_options = {
 				do_seo: $('#opt-seo').is(':checked'),
 				do_content: $('#opt-content').is(':checked'),
@@ -62,28 +73,31 @@ jQuery(document).ready(function ($) {
 
 			var btn = $(this);
 			btn.prop('disabled', true);
-			var $logBox = $('#rs-log');
-			var $progressBar = $('#rs-progress-bar');
 			$logBox.slideDown().html('');
 			$progressBar.css('width', '0%');
 
 			var total = selected_ids.length;
 			var current = 0;
-			var nonce = $('#rs_bulk_nonce').val(); // Get nonce from hidden field
 
+			// --- Recursive function to process posts one by one ---
 			function processNextPost() {
 				if (current >= total) {
-					$logBox.append('<div style="color:#4caf50; font-weight:bold;">>>> پایان کامل عملیات.</div>');
+					// --- All posts processed ---
+					$logBox.append('<div style="color:#4caf50; font-weight:bold; padding-top: 10px;">>>> پایان کامل عملیات.</div>');
 					btn.prop('disabled', false);
+					$logBox.scrollTop($logBox[0].scrollHeight);
 					return;
 				}
 
 				var post_id = selected_ids[current];
 				var percent = Math.round(((current + 1) / total) * 100);
+				
+				// Update UI for this post
 				$progressBar.css('width', percent + '%');
-				$logBox.append('<div><span class="spinner-rs" style="width:12px; height:12px; margin:0 5px 0 0; border-width:2px; vertical-align: middle;"></span> در حال پردازش [#' + post_id + ']...</div>');
+				$logBox.append('<div><span class="spinner-rs" style="width:12px; height:12px; margin:0 5px 0 0; border-width:2px; vertical-align: middle; display: inline-block;"></span> در حال پردازش [#' + post_id + ']...</div>');
 				$logBox.scrollTop($logBox[0].scrollHeight);
 
+				// Send AJAX request for the current post
 				$.post(ajaxurl, {
 					action: 'rs_bulk_generate',
 					post_id: post_id,
@@ -91,24 +105,28 @@ jQuery(document).ready(function ($) {
 					nonce: nonce
 				})
 				.done(function (res) {
+					// --- Request successful ---
 					var symbol = res.success ? '✓' : '✗';
-					var color = res.success ? '#81c784' : '#e57373';
+					var color = res.success ? '#81c784' : '#e57373'; // Green or Red
 					$logBox.append('<div style="color:' + color + '; padding-right:10px;">' + symbol + ' [#' + post_id + '] ' + res.data + '</div>');
 					if (res.success) {
 						$('#status-' + post_id).html('<span class="status-badge status-done">Done</span>');
 					}
 				})
 				.fail(function () {
+					// --- Request failed (Server error) ---
 					$logBox.append('<div style="color:#e57373; padding-right:10px;">✗ [#' + post_id + '] خطای فاجعه‌بار (سرور).</div>');
 				})
 				.always(function () {
+					// --- Move to the next post ---
 					current++;
 					$logBox.scrollTop($logBox[0].scrollHeight);
-					processNextPost(); // Process next post
+					// Call the function again for the next item
+					processNextPost();
 				});
 			}
 			
-			// Start the loop
+			// Start the processing loop
 			processNextPost();
 		});
 	}
