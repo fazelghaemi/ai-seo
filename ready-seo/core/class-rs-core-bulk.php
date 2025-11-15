@@ -2,11 +2,13 @@
 /**
  * Ready Studio SEO Engine - Core Bulk Processor
  *
- * This class handles the "Bulk Generator" admin page,
- * including rendering the post list and processing the AJAX queue.
+ * v12.5: CRITICAL FIX - Added `class_exists()` checks before calling
+ * static methods from modules (SEO, Content, Vision). This prevents
+ * a Fatal Error (Class not found) if a module file is missing or
+ * hasn't been added to the repo yet.
  *
  * @package   ReadyStudio
- * @version   12.0.0
+ * @version   12.5.0
  * @author    Fazel Ghaemi
  */
 
@@ -17,15 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class ReadyStudio_Core_Bulk {
 
 	/**
-	 * Core API instance (injected).
-	 * @var ReadyStudio_Core_API
-	 */
+	* Core API instance (injected).
+	* @var ReadyStudio_Core_API
+	*/
 	private static $api;
 
 	/**
-	 * Core Data instance (injected).
-	 * @var ReadyStudio_Core_Data
-	 */
+	* Core Data instance (injected).
+	* @var ReadyStudio_Core_Data
+	*/
 	private static $data;
 
 	/**
@@ -69,7 +71,10 @@ class ReadyStudio_Core_Bulk {
 			
 			<!-- Header: Title and Post Type Selector -->
 			<div class="rs-header">
-				<h1>Bulk Generator (Nexus Core)</h1>
+				<h1>
+					AI SEO
+					<span class="rs-brand-family">از خانواده <strong>Ready Studio</strong></span>
+				</h1>
 				<form method="get" style="margin:0;">
 					<input type="hidden" name="page" value="promptseo_bulk">
 					<select name="ptype" onchange="this.form.submit()">
@@ -157,6 +162,10 @@ class ReadyStudio_Core_Bulk {
 	 * Fired by 'wp_ajax_rs_bulk_generate' hook from admin-core.js.
 	 */
 	public function ajax_handle_bulk_generate() {
+		
+		// Prevent PHP from timing out on long-running bulk tasks.
+		@set_time_limit( 0 );
+		
 		// 1. Security Check
 		if ( ! check_ajax_referer( 'rs_nonce_action', 'nonce', false ) ) {
 			wp_send_json_error( 'Invalid security token.' );
@@ -187,7 +196,8 @@ class ReadyStudio_Core_Bulk {
 
 		try {
 			// --- SEO Generation ---
-			if ( ! empty( $opts['do_seo'] ) ) {
+			// *** DEFENSIVE CHECK v12.5 ***
+			if ( ! empty( $opts['do_seo'] ) && class_exists( 'ReadyStudio_Module_SEO' ) ) {
 				$post = get_post( $post_id );
 				$content = self::$data->get_content_for_analysis( $post_id );
 				
@@ -203,15 +213,20 @@ class ReadyStudio_Core_Bulk {
 				
 				// Save the data
 				self::$data->save_seo_meta( $post_id, $response );
-				self::$data->save_post_tags( $post_id, $response['tags'] );
-				if ( ! empty( $opts['do_slug'] ) ) {
+				if (isset($response['tags'])) {
+					self::$data->save_post_tags( $post_id, $response['tags'] );
+				}
+				if ( ! empty( $opts['do_slug'] ) && isset($response['latin_name']) ) {
 					self::$data->save_prompt_cpt_data( $post_id, $response['latin_name'] );
 				}
 				$results[] = 'SEO OK';
+			} elseif ( ! empty( $opts['do_seo'] ) ) {
+				$results[] = 'SEO Skipped (Module not found)';
 			}
 
 			// --- Content Generation ---
-			if ( ! empty( $opts['do_content'] ) ) {
+			// *** DEFENSIVE CHECK v12.5 ***
+			if ( ! empty( $opts['do_content'] ) && class_exists( 'ReadyStudio_Module_Content' ) ) {
 				$post = get_post( $post_id );
 				$content = self::$data->get_content_for_analysis( $post_id );
 
@@ -222,33 +237,37 @@ class ReadyStudio_Core_Bulk {
 					throw new Exception( 'Content Error: ' . $response->get_error_message() );
 				}
 
-				self::$data->save_post_content( $post_id, $response['content_body'] );
-				if ( ! empty( $opts['do_alt'] ) ) {
+				if (isset($response['content_body'])) {
+					self::$data->save_post_content( $post_id, $response['content_body'] );
+				}
+				if ( ! empty( $opts['do_alt'] ) && isset($response['image_alt']) ) {
 					self::$data->save_image_alt_text( $post_id, $response['image_alt'] );
 				}
 				$results[] = 'Content OK';
+			} elseif ( ! empty( $opts['do_content'] ) ) {
+				$results[] = 'Content Skipped (Module not found)';
 			}
+			
 			// --- Alt-Only Generation ---
-			elseif ( ! empty( $opts['do_alt'] ) ) {
-				// We need to run vision or content-gen to get alt
-				// Let's use Vision if available, otherwise Content
-				if ( class_exists( 'ReadyStudio_Module_Vision' ) ) {
-					$task_prompt = ReadyStudio_Module_Vision::get_task_prompt();
-					$image_data = ReadyStudio_Module_Vision::get_image_data( $post_id );
+			// *** DEFENSIVE CHECK v12.5 ***
+			elseif ( ! empty( $opts['do_alt'] ) && class_exists( 'ReadyStudio_Module_Vision' ) ) {
+				$task_prompt = ReadyStudio_Module_Vision::get_task_prompt();
+				$image_data = ReadyStudio_Module_Vision::get_image_data( $post_id );
 
-					if ( is_array( $image_data ) ) {
-						$response = self::$api->call_gemini_vision( $task_prompt, $image_data['base64'], $image_data['mime_type'] );
-						if ( is_wp_error( $response ) ) {
-							throw new Exception( 'Vision Alt Error: ' . $response->get_error_message() );
-						}
-						self::$data->save_image_alt_text( $post_id, $response['alt_text'] );
-						$results[] = 'Alt (Vision) OK';
+				if ( is_array( $image_data ) ) {
+					$response = self::$api->call_gemini_vision( $task_prompt, $image_data['base64'], $image_data['mime_type'] );
+					if ( is_wp_error( $response ) ) {
+						throw new Exception( 'Vision Alt Error: ' . $response->get_error_message() );
 					}
+					if (isset($response['alt_text'])) {
+						self::$data->save_image_alt_text( $post_id, $response['alt_text'] );
+					}
+					$results[] = 'Alt (Vision) OK';
+				} else {
+					$results[] = 'Alt Skipped (No Image)';
 				}
-				// Fallback to text-based Alt
-				if( ! in_array( 'Alt (Vision) OK', $results) ) {
-					$results[] = 'Alt Skipped (No Vision)';
-				}
+			} elseif ( ! empty( $opts['do_alt'] ) ) {
+				$results[] = 'Alt Skipped (Vision Module not found)';
 			}
 
 		} catch ( Exception $e ) {

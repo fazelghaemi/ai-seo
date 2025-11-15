@@ -2,11 +2,12 @@
 /**
  * Ready Studio SEO Engine - Core API (The Nexus Brain)
  *
+ * v12.4: CRITICAL FIX - Updated the `send_request` function to
+ * correctly parse the standardized error message from the worker.
  * v12.3: Added back the public `test_connection` function.
- * v12.1: Fixed a critical Parse Error (syntax error).
  *
  * @package   ReadyStudio
- * @version   12.3.0
+ * @version   12.4.0
  * @author    Fazel Ghaemi
  */
 
@@ -208,7 +209,6 @@ class ReadyStudio_Core_API {
 	}
 
 	/**
-	 * *** NEW FUNCTION (Restored) ***
 	 * Public function to test the connection using *unsaved* credentials.
 	 *
 	 * @param string $worker_url The Worker URL from the form.
@@ -259,6 +259,7 @@ class ReadyStudio_Core_API {
 				return new WP_Error( 'ai_test_failed', 'پاسخ تست نامعتبر بود.' );
 			}
 		} else {
+			// This block might be redundant now but good for safety
 			$error_message = isset( $response['error']['message'] ) ? $response['error']['message'] : 'خطای ناشناخته در تست API';
 			return new WP_Error( 'ai_api_error', 'AI API Error: ' . $error_message );
 		}
@@ -296,12 +297,12 @@ class ReadyStudio_Core_API {
 			return new WP_Error( 'worker_response_error', 'پاسخ نامعتبر از ورکر دریافت شد.' );
 		}
 		
-		// The worker itself might have caught an error (e.g., 500)
-		// Or Gemini returned an error (which the worker passes through)
-		if ( isset( $data['error'] ) ) {
-			// Use the message from the worker/gemini if available
-			$error_msg = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown worker error';
-			return new WP_Error( 'worker_internal_error', 'Error: ' . $error_msg );
+		// --- *** CRITICAL FIX (v12.4) *** ---
+		// Check for the standardized error object from the worker's catch block
+		// The worker now returns: {"error": {"message": "..."}}
+		if ( isset( $data['error']['message'] ) ) {
+			// This is a standardized error from our worker OR Gemini
+			return new WP_Error( 'worker_internal_error', 'Error: ' . $data['error']['message'] );
 		}
 
 		// Success! Return the full, decoded response from Gemini

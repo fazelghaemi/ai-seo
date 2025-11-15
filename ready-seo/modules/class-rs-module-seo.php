@@ -2,13 +2,11 @@
 /**
  * Ready Studio SEO Engine - Module: SEO
  *
- * This module handles all core SEO meta generation:
- * - Title, Description, Keywords, Tags
- * - CPT-specific fields (Latin Name)
- * It adds the "SEO" tab to the metabox.
+ * v12.5: CRITICAL FIX - Constructor now correctly accepts
+ * the $core_loader argument, preventing a Fatal Error on init.
  *
  * @package   ReadyStudio
- * @version   12.0.0
+ * @version   12.5.0
  * @author    Fazel Ghaemi
  */
 
@@ -32,12 +30,16 @@ class ReadyStudio_Module_SEO {
 
 	/**
 	 * Constructor.
-	 * Hooks into the Core Loader.
+	 *
+	 * *** FATAL ERROR FIX (v12.5) ***
+	 * The constructor now accepts the $core_loader (passed by the hook)
+	 * and immediately calls the init() function.
+	 *
+	 * @param ReadyStudio_Core_Loader $core_loader The main loader instance.
 	 */
-	public function __construct() {
-		// This hook is fired by the Core Loader (class-rs-core-loader.php)
-		// It passes the loader instance, which contains API and Data helpers.
-		add_action( 'rs_core_loaded', [ $this, 'init' ] );
+	public function __construct( $core_loader ) {
+		// Call the init function immediately, passing the loader
+		$this->init( $core_loader );
 	}
 
 	/**
@@ -220,5 +222,6 @@ class ReadyStudio_Module_SEO {
 
 // Instantiate the module by hooking into the core loader
 add_action( 'rs_core_loaded', function( $core_loader ) {
+	// The $core_loader is passed by the action in class-rs-core-loader.php
 	new ReadyStudio_Module_SEO( $core_loader );
 } );

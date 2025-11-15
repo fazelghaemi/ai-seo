@@ -16,7 +16,11 @@ jQuery(document).ready(function ($) {
 
 	// --- Global Vars ---
 	var post_id = $('#post_ID').val(); // Get the current post ID
-	var nonce = $('#rs_nonce_field').val(); // Get the security nonce
+	
+	// Get nonce from the localized script data (set in core-loader.php)
+	// This is more reliable than scraping the DOM.
+	var nonce = (typeof rs_metabox_config !== 'undefined') ? rs_metabox_config.nonce : $('#rs_nonce_field').val();
+	
 	var busy = false; // Prevents multiple simultaneous AJAX requests
 
 	// --- 1. Tab Switching Logic ---

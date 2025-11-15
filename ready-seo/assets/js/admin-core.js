@@ -1,8 +1,8 @@
 /*
- * Ready Studio SEO Engine - Admin Core JS (v12.3)
+ * Ready Studio SEO Engine - Admin Core JS (v12.5 - Log Fix)
  *
+ * v12.5: Made log messages in bulk generator clearer and more precise.
  * v12.3: Added AJAX handler for "Test Connection" button.
- * v12.0: Handles Settings Page Tabs and Bulk Generation Logic
  */
 
 jQuery(document).ready(function ($) {
@@ -35,7 +35,7 @@ jQuery(document).ready(function ($) {
 		var activeTab = urlParams.get('tab') || 'api'; // Default to 'api'
 		$settingsPage.find('.rs-tab-link[data-tab="' + activeTab + '"]').click();
 		
-		// --- *** NEW: Test Connection AJAX Handler *** ---
+		// --- Test Connection AJAX Handler ---
 		$('#rs-test-connection-btn').click(function() {
 			var $btn = $(this);
 			var $resultDiv = $('#rs-test-connection-result');
@@ -75,7 +75,7 @@ jQuery(document).ready(function ($) {
 		});
 	}
 
-	// --- 2. Bulk Generator Logic ---
+	// --- 2. Bulk Generator Logic (LOGGING IMPROVED) ---
 	var $bulkPage = $('.rs-wrap.bulk-page'); // Target only bulk page
 	if ($bulkPage.length) {
 		
@@ -114,7 +114,7 @@ jQuery(document).ready(function ($) {
 
 			var btn = $(this);
 			btn.prop('disabled', true);
-			$logBox.slideDown().html('');
+			$logBox.slideDown().html('<div>[INFO] شروع عملیات...</div>'); // Clear log
 			$progressBar.css('width', '0%');
 
 			var total = selected_ids.length;
@@ -124,7 +124,7 @@ jQuery(document).ready(function ($) {
 			function processNextPost() {
 				if (current >= total) {
 					// --- All posts processed ---
-					$logBox.append('<div style="color:#4caf50; font-weight:bold; padding-top: 10px;">>>> پایان کامل عملیات.</div>');
+					$logBox.append('<div style="color:#4caf50; font-weight:bold; padding-top: 10px;">>>> تمام آیتم‌های صف پردازش شدند.</div>');
 					btn.prop('disabled', false);
 					$logBox.scrollTop($logBox[0].scrollHeight);
 					return;
@@ -135,7 +135,7 @@ jQuery(document).ready(function ($) {
 				
 				// Update UI for this post
 				$progressBar.css('width', percent + '%');
-				$logBox.append('<div><span class="spinner-rs" style="width:12px; height:12px; margin:0 5px 0 0; border-width:2px; vertical-align: middle; display: inline-block;"></span> در حال پردازش [#' + post_id + ']...</div>');
+				$logBox.append('<div><span class="spinner-rs" style="width:12px; height:12px; margin:0 5px 0 0; border-width:2px; vertical-align: middle; display: inline-block;"></span>[#' + post_id + '] در حال ارسال درخواست به AI... (' + (current+1) + '/' + total + ')</div>');
 				$logBox.scrollTop($logBox[0].scrollHeight);
 
 				// Send AJAX request for the current post
@@ -149,21 +149,34 @@ jQuery(document).ready(function ($) {
 					// --- Request successful ---
 					var symbol = res.success ? '✓' : '✗';
 					var color = res.success ? '#81c784' : '#e57373'; // Green or Red
-					$logBox.append('<div style="color:' + color + '; padding-right:10px;">' + symbol + ' [#' + post_id + '] ' + res.data + '</div>');
+					var message = res.data; // Get message from PHP
+					
+					$logBox.append('<div style="color:' + color + '; padding-right:10px;">' + symbol + ' [#' + post_id + '] ' + message + '</div>');
+					
 					if (res.success) {
-						$('#status-' + post_id).html('<span class="status-badge status-done">Done</span>');
+						$('#status-' + post_id).html('<span class="status-badge status-done">انجام شد</span>');
+					} else {
+						$('#status-' + post_id).html('<span class="status-badge status-error" style="background-color: #f2dede; color: #a94442;">خطا</span>');
 					}
 				})
-				.fail(function () {
+				.fail(function (xhr) {
 					// --- Request failed (Server error) ---
-					$logBox.append('<div style="color:#e57373; padding-right:10px;">✗ [#' + post_id + '] خطای فاجعه‌بار (سرور).</div>');
+					var errorMsg = xhr.status === 500 ? 'خطای 500 سرور (PHP Fatal Error)' : 'خطای شبکه';
+					$logBox.append('<div style="color:#e57373; padding-right:10px;">✗ [#' + post_id + '] خطای فاجعه‌بار: ' + errorMsg + '. (پردازش متوقف شد)</div>');
+					// Stop the loop on a fatal error
+					btn.prop('disabled', false);
 				})
 				.always(function () {
 					// --- Move to the next post ---
 					current++;
 					$logBox.scrollTop($logBox[0].scrollHeight);
-					// Call the function again for the next item
-					processNextPost();
+					
+					// Only continue if the previous request didn't fail fatally
+					if (xhr.status === 500) {
+						// Don't continue
+					} else {
+						processNextPost();
+					}
 				});
 			}
 			
