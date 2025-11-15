@@ -1,79 +1,170 @@
-The ultimate AI-powered SEO & Content Engine for WordPress, featuring a modular architecture, AI Brain, and direct integration with Google Gemini via Cloudflare Workers.
-
+=== AI SEO ===
+Contributors: readystudio, fazelghaemi
+Tags: seo, ai, gemini, content, rank math, jetengine, vision, robots, robots.txt, artificial intelligence, سئو, هوش مصنوعی
+Requires at least: 5.8
+Tested up to: 6.7
+Requires PHP: 7.4
+Stable tag: 13.2.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+افزونه نسل جدید سئو وردپرس با قدرت هوش مصنوعی. مجهز به مغز AI، تولید محتوا، تحلیل بصری و سازنده Robots.txt. محصولی از Ready Studio.
 == Description ==
-Ready Studio SEO Engine is not just an SEO plugin; it's an enterprise-grade, AI-powered content and strategy platform built specifically for demanding sites like prompt galleries and digital asset libraries.
-This plugin connects directly to your Google Gemini API key via a secure Cloudflare Worker, ensuring high speed and complete privacy. It bypasses the limitations of traditional SEO tools by understanding content on a semantic and even visual level.
-
-Core Features (Nexus Core v12)
-Modular Architecture: The plugin is built on a clean, object-oriented framework. The Core handles API, Data, and Settings, while all features (SEO, Content, Vision) are independent modules.
-Nexus AI Brain (System Prompt): A central settings panel where you can define your site's "Knowledge Base" (brand voice, audience) and "Custom Rules" (e.g., "Always include #ReadyPrompt in the meta description").
-Secure Cloudflare Worker: All API requests are proxied through your own Cloudflare Worker. Your Gemini API key never leaves your worker, ensuring 100% security on the WordPress side.
-Bulk Generation: A powerful admin panel to generate SEO, content, and alt text for hundreds of posts in a queue. Features a progress bar and a detailed log console.
-CPT-Aware Logic: Specialized logic for Custom Post Types. For example, it's designed to read from prompts-text meta fields (for JetEngine) and generate "Strict, Descriptive" titles instead of clickbait.
-
-Included Modules
-
-SEO Module:
-Generates high-CTR SEO titles and meta descriptions.
-Extracts a relevant Focus Keyword.
-Generates 5 relevant tags.
-Automatically syncs with Rank Math & Yoast fields.
-Generates "Strict" descriptive titles and Latin slugs for CPTs.
-
-Content Module:
-Solves "Thin Content": A "Content Writer" button that generates a 150-word descriptive paragraph (analyzing artistic style, mood, and use cases) to be used as the main post content.
-Generates context-aware Image Alt Text based on the text of the prompt.
-
-Vision Module (Gemini Vision API):
-True Visual Analysis: This module "looks" at the post's Featured Image.
-It bypasses the text prompt and analyzes the actual resulting image.
-Generates hyper-accurate Art Style tags (e.g., "Photorealistic, Macro, Cinematic Lighting").
-Generates Visual Keywords (e.g., "gold coin, wood, treasure").
-Generates the most accurate Image Alt Text possible, based on what is visually present.
-
+افزونه AI SEO فراتر از یک ابزار سئو است؛ این یک استراتژیست محتوا و دستیار فنی هوشمند برای سایت شماست.
+آیا از صرف ساعت‌ها زمان برای نوشتن عنوان‌های جذاب، توضیحات متا، و محتوای بهینه خسته شده‌اید؟ افزونه AI SEO، محصولی از خانواده Ready Studio، این فرآیند را به چند ثانیه کاهش می‌دهد.
+این افزونه با استفاده از معماری ماژولار و اتصال مستقیم به API قدرتمند Google Gemini (از طریق ورکر امن Cloudflare)، به شما اجازه می‌دهد تا نه تنها سئوی سایت خود را خودکار کنید، بلکه محتوای ضعیف (Thin Content) را شناسایی کرده و آن را با پاراگراف‌های توصیفی غنی‌سازی کنید.
+امنیت کامل: برخلاف افزونه‌های دیگر، کلید API ارزشمند شما هرگز در دیتابیس وردپرس ذخیره نمی‌شود. تمام درخواست‌ها از طریق ورکر شخصی شما در Cloudflare عبور می‌کنند.
+قابلیت‌های خارق‌العاده (Nexus Core v13)
+🧠 مغز هوشمند AI (Nexus Brain):
+به افزونه یاد بدهید چطور فکر کند! در بخش تنظیمات، می‌توانید "دانش پایه" (هویت برند، مخاطبان، و لحن نگارش سایت) و "قوانین سفارشی" (مانند "همیشه از هشتگ #ReadyPrompt استفاده کن") را به AI آموزش دهید.
+✍️ ماژول سئو و تولید محتوا:
+با یک کلیک در ویرایشگر پست، عنوان سئو، توضیحات متا، کلمات کلیدی کانونی (سازگار با Rank Math) و تگ‌های مرتبط بسازید. مهم‌تر از آن، مشکل "محتوای ضعیف" (Thin Content) را با تولید پاراگراف‌های توصیفی و غنی برای بدنه پست خود حل کنید.
+👁️ ماژول تحلیل بصری (Gemini Vision):
+اینجا جادو اتفاق می‌افتد. این ماژول به جای خواندن متن، مستقیماً به تصویر شاخص شما "نگاه" می‌کند. AI سبک هنری (مثلاً "سینمایی، ماکرو")، کلمات کلیدی بصری (مثلاً "سکه طلا، چوب تیره") و دقیق‌ترین متن جایگزین (Alt Text) ممکن را بر اساس آنچه واقعاً در تصویر می‌بیند، استخراج می‌کند.
+🤖 ماژول سازنده Robots.txt هوشمند:
+دیگر نگران خطای 404 یا تنظیمات پیچیده robots.txt نباشید. به سادگی با زبان فارسی به AI دستور دهید (مثلاً: "سایت را از دسترس همه بجز گوگل ببند") و AI بلافاصله قوانین حرفه‌ای را برای شما تولید می‌کند. این ماژول هم از حالت "مجازی" وردپرس و هم از "نوشتن فایل فیزیکی" (برای حل مشکل 404 سرورها) پشتیبانی می‌کند.
+🚀 ماژول تولید انبوه (Bulk Generator):
+تمام پست‌های قدیمی، محصولات، یا پست‌تایپ‌های سفارشی خود را با یک کلیک بهینه‌سازی کنید. در صف پردازش، انتخاب کنید که آیا سئو، محتوا، یا Alt تصاویر تولید شوند و پیشرفت کار را در "کنسول لاگ" زنده مشاهده کنید.
+🎨 رابط کاربری "Soft UI" (طراحی نرم):
+با الهام از جدیدترین استانداردهای UI/UX گوگل و بر اساس هویت بصری Ready Studio، ما یک رابط کاربری زیبا، مدرن، با گوشه‌های گرد و فونت سفارشی (یکان بخ) طراحی کرده‌ایم تا کار با افزونه لذت‌بخش باشد.
 == Installation ==
-
-Cloudflare Worker:
-Deploy the worker.js script (from the repo) to a new Cloudflare Worker.
-In the Worker's settings, add a secret variable named GEMINI_API_KEY and paste your Google Gemini API key.
-(Note: The v12 worker is "smart" and handles both text and vision requests based on the 'action_type' parameter.)
-
-WordPress Plugin:
-Clone or download the repository: git clone https://github.com/fazelghaemi/ai-seo.git ready-seo
-Upload the ready-seo folder to your wp-content/plugins/ directory.
-Activate the plugin through the 'Plugins' menu in WordPress.
-Configuration:
-Navigate to the "Ready Studio" menu in your WordPress admin dashboard.
-In the "اتصال (API)" tab, enter your Cloudflare Worker URL.
-(Optional) Go to the "مغز هوش مصنوعی (AI Brain)" tab to add your custom knowledge base and rules.
-You are ready to go!
-
+راه‌اندازی این افزونه حرفه‌ای در ۳ مرحله ساده انجام می‌شود:
+مرحله ۱: راه‌اندازی ورکر Cloudflare (اجباری)
+به حساب Cloudflare خود بروید، یک Worker جدید بسازید.
+کد کامل زیر را در ویرایشگر ورکر کپی و ذخیره (Save and Deploy) کنید:
+<pre>
+export default {
+async fetch(request, env, ctx) {
+if (request.method !== "POST") {
+return new Response(JSON.stringify({ error: { message: "Expected POST request" } }), {
+status: 405,
+headers: { "Content-Type": "application/json" }
+});
+}
+try {
+const data = await request.json();
+const { api_key, model_name, action_type } = data;
+if (!api_key || !model_name) {
+return new Response(JSON.stringify({ error: { message: "Missing API Key or Model Name" } }), {
+status: 400,
+headers: { "Content-Type": "application/json" }
+});
+}
+let geminiUrl;
+let payload;
+if (action_type === 'vision') {
+geminiUrl = https://generativelanguage.googleapis.com/v1beta/models/${model_name}:generateContent?key=${api_key};
+const { system_prompt, image_data, mime_type } = data;
+payload = {
+contents: [{
+parts: [
+{ text: system_prompt },
+{ inlineData: { mimeType: mime_type, data: image_data } }
+]
+}],
+generationConfig: { responseMimeType: "application/json" }
+};
+} else {
+geminiUrl = https://generativelanguage.googleapis.com/v1beta/models/${model_name}:generateContent?key=${api_key};
+const { contents, generationConfig } = data;
+payload = {
+contents: contents,
+generationConfig: generationConfig
+};
+}
+const geminiResponse = await fetch(geminiUrl, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(payload)
+});
+const geminiData = await geminiResponse.json();
+if (!geminiResponse.ok) {
+throw new Error(geminiData.error.message || "Unknown Gemini API error");
+}
+return new Response(JSON.stringify(geminiData), {
+headers: { "Content-Type": "application/json" }
+});
+} catch (error) {
+return new Response(JSON.stringify({ error: { message: error.message } }), {
+status: 500,
+headers: { "Content-Type": "application/json" }
+});
+}
+}
+};
+</pre>
+3. آدرس ورکر ساخته شده (مثلاً https://my-worker.example.workers.dev) را کپی کنید.
+مرحله ۲: نصب و تنظیم افزونه
+پوشه ready-seo را در wp-content/plugins/ آپلود و افزونه را فعال کنید.
+به منوی جدید "Ready Studio" در پیشخوان وردپرس بروید.
+در تب "اتصال (API)"، آدرس ورکر (از مرحله ۱) و کلید API گوگل Gemini خود را وارد کنید.
+دکمه "تست ارتباط با ورکر" را بزنید.
+اگر پیام "✓ ارتباط موفقیت‌آمیز بود!" را دیدید، افزونه آماده است.
+مرحله ۳: (پیشنهادی) آموزش "مغز هوش مصنوعی"
+به تب "مغز هوش مصنوعی (AI Brain)" بروید.
+در بخش "دانش پایه"، سایت خود را به AI معرفی کنید (مثال: "ما یک سایت فروشگاهی قهوه هستیم...").
+در بخش "پرامپت سفارشی"، قوانین خود را بنویسید (مثال: "همیشه در تگ‌ها کلمه 'قهوه' را بگنجان.").
+تنظیمات را ذخیره کنید. هوش مصنوعی اکنون طبق هویت برند شما محتوا تولید می‌کند.
+== Frequently Asked Questions ==
+= آیا به افزونه Rank Math یا Yoast نیاز دارم؟ =
+خیر. افزونه AI SEO به تنهایی کار می‌کند. اما اگر Rank Math یا Yoast نصب باشند، افزونه ما به طور خودکار فیلدهای آن‌ها (کلمه کلیدی، عنوان، متا) را پر می‌کند و با آن‌ها کاملاً یکپارچه است.
+= چرا دکمه "تست ارتباط" خطای "Missing API Key" می‌دهد؟ =
+این خطا از طرف ورکر کلودفلر می‌آید و به این معناست که شما "کلید API (Gemini)" را در فیلد مربوطه در صفحه تنظیمات افزونه وارد نکرده‌اید.
+= چرا دکمه "تست ارتباط" خطای "Error: 404" یا "API Key not valid" می‌دهد؟ =
+این خطا از طرف گوگل می‌آید. به این معناست که کلید API شما صحیح است، اما مدل انتخابی (مثلاً gemini-2.0-flash) برای اکانت شما فعال نیست.
+راه حل: مدل هوش مصنوعی را به gemini-1.5-pro تغییر دهید و مجدداً تست کنید.
+= چرا دکمه "تست ارتباط" خطای "✗ خطای سرور. (AJAX Fail)" می‌دهد؟ =
+این یک خطای 403 یا 500 از طرف سرور وردپرس شماست. معمولاً به این دلیل است که یک افزونه امنیتی (مثل Wordfence) یا فایروال هاست شما (ModSecurity)، دسترسی به admin-ajax.php را مسدود کرده است.
+راه حل: در افزونه امنیتی خود، admin-ajax.php را در "لیست سفید" (Whitelist) قرار دهید.
+= چرا متاباکس AI SEO در صفحه ویرایش پست خالی است (فقط دکمه ذخیره دارد)؟ =
+این خطا به این معناست که فایل‌های ماژول افزونه به درستی بارگذاری نشده‌اند.
+راه حل: افزونه را به طور کامل حذف و مجدداً نصب کنید. مطمئن شوید که پوشه modules و تمام فایل‌های PHP داخل آن (class-rs-module-seo.php، class-rs-module-content.php و class-rs-module-vision.php) به درستی در هاست شما کپی شده‌اند.
+= چرا آدرس yoursite.com/robots.txt خطای 404 می‌دهد؟ =
+سرور شما (معمولاً nginx) به دنبال یک فایل فیزیکی می‌گردد.
+راه حل: به "Ready Studio -> سازنده Robots.txt" بروید. پس از تولید قوانین، دکمه مشکی "نوشتن فایل فیزیکی در هاست" را بزنید تا افزونه فایل را مستقیماً در ریشه هاست شما ایجاد کند.
+== Screenshots ==
+صفحه تنظیمات اصلی (اتصال API و مغز هوشمند AI).
+متاباکس در ویرایشگر پست (نمایش هر سه تب: سئو، محتوا، و تحلیل بصری).
+صفحه تولید انبوه (Bulk Generator) همراه با کنسول لاگ.
+ماژول سازنده Robots.txt (نمایش پرامپت سفارشی و پیش‌نمایش زنده).
+نتیجه نهایی (پر شدن خودکار فیلدهای افزونه Rank Math).
 == Changelog ==
-
+= 13.2.0 (Soft UI) =
+MAJOR UIX: بازنویسی کامل style-core.css و style-metabox.css بر اساس UI/UX "نرم و گرد".
+NEW: اعمال فونت سفارشی (یکان بخ - readyfont.woff) در تمام بخش‌های افزونه.
+= 13.1.0 =
+NEW: اضافه شدن ماژول "راهنما و آموزش" (همین صفحه) به صورت داینامیک.
+FIX: بازنویسی بخش عیب‌یابی برای مشتریان نهایی.
+NEW: جاسازی کد ورکر به جای لینک به گیت‌هاب.
+FIX: حذف ارجاعات به CPT خاص (prompts) برای عمومی‌سازی افزونه.
+= 13.0.0 =
+FIX: رفع کامل خطای فاجعه‌بار Parse Error در ماژول Robots.txt با بازنویسی تابع get_task_prompt.
+= 12.9.0 =
+NEW: اضافه شدن فیلد "پرامپت سفارشی" (دستور با زبان فارسی) به ماژول Robots.txt.
+FIX: آپدیت admin-core.js برای پشتیبانی از پرامپت سفارشی.
+= 12.8.0 =
+NEW: اضافه شدن قابلیت "نوشتن فایل فیزیکی robots.txt" برای حل مشکل 404 سرورها.
+NEW: اضافه شدن بررسی سطح دسترسی (Permissions) هاست.
+= 12.7.0 =
+FIX: اصلاح پرامپت AI در ماژول Robots.txt برای تولید قوانین حرفه‌ای و امن (بستن plugins و themes).
+= 12.6.0 =
+FIX: رفع خطای Fatal Error مربوط به بارگذاری منوی Robots.txt قبل از بارگذاری ماژول.
+= 12.5.0 =
+FIX: رفع خطای Fatal Error (عدم نمایش متاباکس) با اصلاح __construct در هر سه ماژول (SEO, Content, Vision).
+FIX: رفع خطای Fatal Error (کلاس ReadyStudio_Module_SEO یافت نشد) در "تولید انبوه" با افزودن class_exists.
+= 12.4.0 =
+FIX: رفع خطای "AJAX Fail" و "Unknown worker error" در دکمه "تست ارتباط" با اصلاح worker.js و class-rs-core-api.php.
+= 12.3.0 =
+NEW: اضافه شدن مجدد دکمه "تست ارتباط" به تنظیمات.
+FIX: رفع خطای Fatal Error (عدم تزریق API به Settings).
+FIX: رفع مشکل "منوی تکراری" در پیشخوان وردپرس.
+= 12.1.0 =
+NEW: اعمال کامل برندینگ "AI SEO" (محصول Ready Studio) با رنگ‌های سازمانی (مشکی/سبز) و لوگوهای سفارشی.
+NEW: بازنویسی کامل CSS برای UIX مدرن (دکمه‌های منحنی و قطور).
 = 12.0.0 (Nexus Core) =
-MAJOR: Complete architectural refactor into a modular (Core + Modules) framework.
-NEW: Added Vision Module (class-rs-module-vision.php) for Gemini Vision analysis.
-NEW: Upgraded Cloudflare Worker (worker.js) to handle both 'text' and 'vision' action_type.
-NEW: Added Core Loader (class-rs-core-loader.php) to manage all dependencies and module loading.
-NEW: Added Core Metabox (class-rs-core-metabox.php) to act as a shell for modules.
-NEW: All JS/CSS assets split into core (style-core.css, admin-core.js) and module-specific files.
-FIX: Ensured all PHP classes are final and syntactically correct. No more Parse Errors.
-
+MAJOR: بازنویسی کامل معماری افزونه به "هسته ماژولار" (Core + Modules).
+NEW: اضافه شدن ماژول تحلیل بصری (Vision).
+NEW: ارتقای ورکر کلودفلر برای پردازش همزمان متن و تصویر.
+NEW: تفکیک تمام فایل‌های PHP و CSS به کلاس‌های مجزا.
 = 10.0.0 =
-FIX: Definitive fix for the "Unclosed '{'" Parse Error by removing a duplicate function.
-
-= 8.0.0 =
-FIX: Hardened code against Parse Errors by replacing ?? with isset() for older PHP.
-
-= 6.0.0 =
-NEW: Added "Content Writer" to solve Thin Content.
-NEW: Added automated Image Alt Text generation.
-NEW: Metabox UI updated with tabs.
-
-= 4.0.0 =
-NEW: Added "Bulk Generator" admin page with queuing.
-NEW: Added "AI Brain" (Knowledge Base & Custom Prompts) settings page.
-NEW: Added CPT-specific logic for 'prompts'.
-
-= 1.0.0 =
-Initial release.
+FIX: رفع نهایی خطای فاجعه‌بار Parse Error (کلاس تکراری).
+= 1.
