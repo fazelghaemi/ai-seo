@@ -4,7 +4,7 @@
  */
 
 :root {
-	/* متغیرها از فایل core به ارث می‌رسند */
+	/* متغیرها (مانند --rs-primary) از فایل style-core.css به ارث می‌رسند */
 }
 
 /* --- Metabox Shell --- */
@@ -140,30 +140,11 @@
 	text-align: center;
 	padding: 20px 0;
 }
-.spinner-rs {
-	width: 28px;
-	height: 28px;
-	border: 3px solid rgba(0, 0, 0, 0.1);
-	border-radius: 50%;
-	border-top-color: var(--rs-primary);
-	border-left-color: var(--rs-accent);
-	animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-	margin: 15px auto;
-}
 
-@keyframes spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
+/* * Spinner-rs is defined in style-core.css 
+ * but can be redefined here if needed.
+ */
 
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(5px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
+/*
+ * End of Metabox Base Styles
+ */

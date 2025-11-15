@@ -1,9 +1,17 @@
 /*
- * Ready Studio SEO Engine - Module: Vision (v12.0)
+ * Ready Studio SEO Engine - Module: Vision (v11.0)
+ *
+ * Styles for the Visual Tagger & Style Analyzer module.
  */
+
+:root {
+	/* رنگ‌های اصلی از فایل base گرفته می‌شود */
+	/* --rs-primary, --g-blue, etc. */
+}
 
 /* --- Vision Tab Container --- */
 .rs-vision-panel {
+	padding: 16px;
 	animation: fadeIn 0.4s ease-out;
 }
 
@@ -41,6 +49,7 @@
 
 /* --- Vision Button --- */
 .btn-vision {
+	/* گرادیانت مخصوص این ماژول */
 	background: linear-gradient(
 		135deg,
 		var(--rs-primary) 0%,
@@ -55,7 +64,7 @@
 }
 
 /* --- Results Area --- */
-.rs-vision-results {
+#area-vision-results {
 	margin-top: 15px;
 	border-top: 1px solid var(--g-border);
 	padding-top: 15px;
