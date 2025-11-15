@@ -1,27 +1,26 @@
 /*
- * Ready Studio SEO Engine - Module: Vision (v11.0)
+ * Ready Studio SEO Engine - Module: Vision (v13.2 - Soft UI Refresh)
  *
- * Styles for the Visual Tagger & Style Analyzer module.
+ * v13.2: Applied Soft UI variables to the preview box and result fields.
  */
 
 :root {
-	/* رنگ‌های اصلی از فایل base گرفته می‌شود */
-	/* --rs-primary, --g-blue, etc. */
+	/* متغیرها (مانند --rs-primary) از فایل style-core.css به ارث می‌رسند */
 }
 
 /* --- Vision Tab Container --- */
 .rs-vision-panel {
-	padding: 16px;
 	animation: fadeIn 0.4s ease-out;
+	/* Padding is now handled by the parent .rs-metabox-content */
 }
 
-/* --- Image Preview Box --- */
+/* --- Image Preview Box (UPDATED RADIUS) --- */
 .rs-vision-preview {
 	width: 100%;
 	height: 150px;
 	background-color: var(--g-bg);
 	border: 2px dashed var(--g-border);
-	border-radius: var(--rs-radius);
+	border-radius: var(--rs-radius-standard); /* 12px Rounded */
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -48,23 +47,26 @@
 }
 
 /* --- Vision Button --- */
+/* This class inherits .pseo-btn (curve, padding, shadow) from core */
+/* It only needs to override the background */
 .btn-vision {
-	/* گرادیانت مخصوص این ماژول */
 	background: linear-gradient(
 		135deg,
 		var(--rs-primary) 0%,
 		var(--g-blue) 100%
 	);
 	color: var(--g-white);
-	box-shadow: var(--rs-shadow-1);
 }
 .btn-vision:hover:not(:disabled) {
-	transform: translateY(-1px);
-	box-shadow: var(--rs-shadow-2);
+	background: linear-gradient(
+		135deg,
+		var(--rs-primary-hover) 0%,
+		var(--g-blue-hover) 100%
+	);
 }
 
 /* --- Results Area --- */
-#area-vision-results {
+.rs-vision-results {
 	margin-top: 15px;
 	border-top: 1px solid var(--g-border);
 	padding-top: 15px;
@@ -73,13 +75,23 @@
 .pseo-field.style-field label,
 .pseo-field.visual-tags-field label {
 	font-weight: 600;
+	color: var(--rs-primary); /* Brand color for emphasis */
+}
+
+/* --- Result Fields (UPDATED STYLES) --- */
+/* These inherit .pseo-field input styles, we just override font */
+#in-art-style,
+#in-visual-tags {
+	background-color: var(--g-bg); /* Light background for generated content */
+	font-family: var(--rs-font-code); /* Use Code Font */
+	font-size: 13px; /* Match other inputs */
 	color: var(--rs-primary);
 }
 
-#in-art-style,
-#in-visual-tags {
-	background: var(--g-bg);
-	border-left: 3px solid var(--rs-primary);
-	font-size: 12px;
-	font-family: monospace;
+/* Ensure focus matches other fields */
+#in-art-style:focus,
+#in-visual-tags:focus {
+	border-color: var(--rs-accent);
+	box-shadow: 0 0 0 3px rgba(1, 173, 161, 0.2);
+	background-color: var(--g-white); /* White on focus */
 }

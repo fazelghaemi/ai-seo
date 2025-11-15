@@ -1,6 +1,8 @@
 /*
- * Ready Studio - Metabox Base Styles (v12.1 - Branding Update)
- * Styles for the main metabox shell, tabs, and base modules (SEO, Content).
+ * Ready Studio - Metabox Base Styles (v13.2 - Soft UI Refresh)
+ *
+ * v13.2: Applied Soft UI variables (--rs-radius-*) to all metabox
+ * elements (shell, tabs, fields) for a consistent, rounded look.
  * v12.1: Updated button styles and header branding.
  */
 
@@ -14,8 +16,9 @@
 	padding: 0;
 	position: relative;
 	border: 1px solid var(--g-border);
-	border-radius: var(--rs-radius-standard); /* 8px */
+	border-radius: var(--rs-radius-standard); /* 12px Rounded Shell */
 	overflow: hidden;
+	box-shadow: var(--rs-shadow-1);
 }
 
 /* --- Metabox Branding Header (NEW LOGO) --- */
@@ -34,14 +37,6 @@
 	/* لوگوی اصلی ردی استودیو */
 	content: url('../logo/readystudio-logo.svg');
 }
-.rs-branding h4 {
-	/* متن هدر مخفی است چون از لوگو استفاده می‌کنیم */
-	margin: 0;
-	color: var(--rs-primary);
-	font-size: 16px;
-	font-weight: 700;
-	display: none;
-}
 .rs-branding-family {
 	font-size: 10px;
 	color: var(--g-text-light);
@@ -55,13 +50,13 @@
 }
 
 
-/* --- Metabox Tabs (NEW COLORS) --- */
+/* --- Metabox Tabs (NEW COLORS & RADIUS) --- */
 #rs-metabox-tabs {
 	display: flex;
 	justify-content: space-around;
 	border-bottom: 1px solid var(--g-border);
 	padding: 0;
-	background: var(--g-white);
+	background: var(--g-bg); /* Lighter background for tab bar */
 	margin: 0;
 }
 
@@ -76,15 +71,19 @@
 	flex: 1;
 	text-align: center;
 	margin-bottom: -1px; /* Overlap border */
+	/* Rounded top corners for tabs */
+	border-radius: var(--rs-radius-standard) var(--rs-radius-standard) 0 0;
 }
 
 #rs-metabox-tabs .rs-tab-link:hover {
-	background: var(--g-bg);
+	background: var(--g-white);
+	color: var(--rs-primary);
 }
 
 #rs-metabox-tabs .rs-tab-link.active {
 	color: var(--rs-accent); /* New Mint */
 	border-bottom-color: var(--rs-accent); /* New Mint */
+	background: var(--g-white); /* Active tab is white */
 }
 
 .rs-metabox-content {
@@ -96,7 +95,7 @@
 	display: block;
 }
 
-/* --- Fields (Used by all modules) (NEW COLORS) --- */
+/* --- Fields (Used by all modules) (NEW RADIUS) --- */
 .pseo-field {
 	margin-bottom: 12px;
 }
@@ -111,10 +110,10 @@
 .pseo-field input[type="text"],
 .pseo-field textarea {
 	width: 100%;
-	padding: 8px 12px;
+	padding: 10px 14px; /* More padding */
 	font-size: 12px;
 	border: 1px solid var(--g-border);
-	border-radius: var(--rs-radius-standard); /* 8px */
+	border-radius: var(--rs-radius-standard); /* 12px Rounded fields */
 	background-color: #fff;
 	color: var(--g-text-dark);
 }
@@ -125,36 +124,41 @@
 .pseo-field input:focus,
 .pseo-field textarea:focus {
 	border-color: var(--rs-accent); /* New Mint */
-	box-shadow: 0 0 0 2px rgba(1, 173, 161, 0.2);
+	box-shadow: 0 0 0 3px rgba(1, 173, 161, 0.2); /* Softer focus ring */
 	outline: none;
 }
 
 /* --- Special Fields --- */
 .cpt-notice {
-	background: #e8f0fe; /* Blue info color */
-	color: #174ea6;
-	padding: 10px;
-	border-radius: var(--rs-radius-standard);
-	font-size: 12px;
-	margin-bottom: 15px;
+    background-color: #e3f2fd; /* Light blue */
+    color: #1565c0; /* Darker blue */
+    border-right: 5px solid #2196f3; /* Stronger blue border */
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: var(--rs-radius-standard); /* Rounded corners */
+    box-shadow: var(--rs-shadow-1);
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	border-right: 4px solid var(--g-blue);
+	gap: 10px;
 }
 .cpt-notice::before {
-	content: "💡";
+	content: "\f348"; /* Dashicon: info */
+	font-family: dashicons;
+	font-size: 24px;
+	line-height: 1;
+	color: #2196f3;
 }
 
 #in-latin-name {
-	font-family: monospace;
+	font-family: var(--rs-font-code);
 	direction: ltr;
 	text-align: left;
 	background: var(--g-bg);
+	border-radius: var(--rs-radius-small); /* 8px for code-like */
 }
 
 /* --- Action Bar --- */
-/* (دکمه‌های داخل متاباکس از استایل .pseo-btn در style-core.css ارث‌بری می‌کنند) */
+/* (Buttons inherit .pseo-btn style from style-core.css) */
 .rs-metabox-actions {
 	margin-top: 15px;
 	border-top: 1px solid var(--g-border);

@@ -1,11 +1,14 @@
 /*
- * Ready Studio SEO Engine - Core Styles (v13.1 - Font Update)
+ * Ready Studio SEO Engine - Core Styles (v13.2 - Soft UI Refresh)
  *
+ * v13.2: Implemented Soft UI based on provided example.
+ * - Rounded corners (8-14px) for all elements (buttons, fields, cards, tabs).
+ * - Softer box-shadows.
+ * - Enhanced padding for a spacious feel.
  * v13.1: Added custom font "ReadyFont" (Yekan Bakh).
- * v12.3: Re-styled .btn-primary to use brand colors (Black).
  */
 
-/* --- 1. NEW: Font Face Definition --- */
+/* --- 1. Font Face Definition --- */
 @font-face {
 	font-family: 'ReadyFont';
 	src: url('../font/readyfont.woff') format('woff');
@@ -14,7 +17,7 @@
 	font-display: swap;
 }
 
-/* --- 2. Root & CSS Variables (NEW FONT) --- */
+/* --- 2. Root & CSS Variables (Soft UI) --- */
 :root {
 	/* Ready Studio Brand Palette */
 	--rs-primary: #010101; /* مشکی میدنایت */
@@ -24,23 +27,24 @@
 
 	/* Google Material Palette */
 	--g-blue: #1a73e8;
+	--g-blue-hover: #176ad1; /* A slightly darker blue for hover */
 	--g-green: #1e8e3e;
 	--g-red: #d93025;
-	--g-bg: #f8f9fa;
+	--g-bg: #f5f7f9; /* Lighter background for Soft UI */
 	--g-border: #e8eaed;
 	--g-text-light: #5f6368;
 	--g-text-dark: #202124;
 	--g-white: #ffffff;
 
-	/* UI Metrics */
-	--rs-radius-modern: 20px; /* "Curve" style for buttons */
-	--rs-radius-standard: 8px; /* Standard radius for cards */
-	--rs-shadow-1: 0 1px 2px 0 rgba(60, 64, 67, 0.15),
-		0 1px 3px 1px rgba(60, 64, 67, 0.1);
-	--rs-shadow-2: 0 4px 8px 3px rgba(60, 64, 67, 0.1),
-		0 1px 3px rgba(60, 64, 67, 0.15);
+	/* UI Metrics (UPDATED for Soft UI) */
+	--rs-radius-modern: 16px; /* "Curve" style for large elements, buttons */
+	--rs-radius-standard: 12px; /* Standard radius for cards, fields */
+	--rs-radius-small: 8px; /* For logs, code blocks */
+
+	--rs-shadow-1: 0px 4px 10px rgba(0, 0, 0, 0.06); /* Softer initial shadow */
+	--rs-shadow-2: 0px 8px 20px rgba(0, 0, 0, 0.1);  /* Slightly more pronounced on hover */
 	
-	/* --- UPDATED FONT STACK --- */
+	/* Font Stack */
 	--rs-font: 'ReadyFont', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
 		Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	--rs-font-code: 'Consolas', 'Monaco', monospace; /* Monospace for code/logs */
@@ -63,9 +67,9 @@
 /* --- 4. Admin Page Wrapper (Settings & Bulk) --- */
 .rs-wrap {
 	background: var(--g-bg);
-	border-radius: var(--rs-radius-standard);
+	border-radius: var(--rs-radius-modern); /* More rounded wrapper */
 	padding: 0;
-	box-shadow: none;
+	box-shadow: var(--rs-shadow-1); /* Soft shadow for the whole wrapper */
 	margin-top: 20px;
 	border: 1px solid var(--g-border);
 	overflow: hidden;
@@ -99,7 +103,7 @@
 	height: 28px;
 	background: url('../logo/aiseo-logo.svg') no-repeat center center;
 	background-size: contain;
-	border-radius: 6px;
+	border-radius: 8px; /* Slightly rounded logo */
 }
 
 .rs-header h1 .rs-brand-family {
@@ -121,13 +125,14 @@
 	background: var(--g-white);
 	padding: 12px 24px 0 24px;
 	border-bottom: 1px solid var(--g-border);
+	/* No direct border-radius on tabs themselves, let children define it */
 }
 
 .rs-tab-link {
 	font-size: 14px;
 	font-weight: 500;
 	color: var(--g-text-light);
-	padding: 10px 16px;
+	padding: 10px 18px; /* More padding */
 	margin-bottom: -1px;
 	border-bottom: 2px solid transparent;
 	text-decoration: none;
@@ -135,6 +140,7 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	border-radius: var(--rs-radius-standard) var(--rs-radius-standard) 0 0; /* Rounded top corners */
 }
 
 .rs-tab-link:hover {
@@ -146,12 +152,14 @@
 	color: var(--rs-accent);
 	border-bottom-color: var(--rs-accent);
 	font-weight: 600;
+	background: var(--g-bg); /* Active tab gets background */
 }
 
 .rs-tab-content {
 	display: none;
 	padding: 24px;
 	background: var(--g-white);
+	border-radius: 0 0 var(--rs-radius-modern) var(--rs-radius-modern); /* Rounded bottom corners if it's the only content */
 }
 .rs-tab-content.active {
 	display: block;
@@ -188,10 +196,10 @@
 .pseo-field textarea,
 .pseo-field select {
 	width: 100%;
-	padding: 8px 12px;
+	padding: 10px 14px; /* More padding */
 	font-size: 13px;
 	border: 1px solid var(--g-border);
-	border-radius: var(--rs-radius-standard);
+	border-radius: var(--rs-radius-standard); /* Rounded inputs */
 	background-color: #fff;
 	color: var(--g-text-dark);
 	transition: all 0.2s ease-in-out;
@@ -203,7 +211,7 @@
 .pseo-field input:focus,
 .pseo-field textarea:focus {
 	border-color: var(--rs-accent);
-	box-shadow: 0 0 0 2px rgba(1, 173, 161, 0.2);
+	box-shadow: 0 0 0 3px rgba(1, 173, 161, 0.2); /* Softer focus ring */
 	outline: none;
 }
 
@@ -218,6 +226,7 @@
 	background: var(--g-bg);
 	border-color: var(--g-border);
 	font-size: 12px;
+	border-radius: var(--rs-radius-small); /* Slightly less rounded for code */
 }
 .ai-brain-desc {
 	font-size: 12px;
@@ -233,7 +242,7 @@
 	justify-content: center;
 	width: 100%;
 	padding: 10px 24px;
-	border-radius: var(--rs-radius-modern);
+	border-radius: var(--rs-radius-modern); /* Rounded buttons */
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
@@ -241,7 +250,7 @@
 	border: none;
 	text-decoration: none;
 	gap: 6px;
-	box-shadow: var(--rs-shadow-1);
+	box-shadow: var(--rs-shadow-1); /* Soft shadow */
 	font-family: var(--rs-font); /* Apply font to buttons */
 }
 .pseo-btn:disabled {
@@ -252,8 +261,8 @@
 	transform: none;
 }
 .pseo-btn:hover:not(:disabled) {
-	transform: translateY(-1px);
-	box-shadow: var(--rs-shadow-2);
+	transform: translateY(-2px); /* Slightly more pronounced hover lift */
+	box-shadow: var(--rs-shadow-2); /* More pronounced shadow on hover */
 }
 
 .btn-generate {
@@ -307,7 +316,8 @@
 }
 .rs-control-group input[type="checkbox"] {
 	margin: 0;
-	accent-color: var(--rs-accent);
+	accent-color: var(--rs-accent); /* Custom checkbox color */
+	border-radius: 4px; /* Rounded checkboxes */
 }
 .rs-divider {
 	width: 1px;
@@ -324,9 +334,10 @@
 /* Progress Bar */
 #rs-progress-bar {
 	width: 0%;
-	height: 5px;
+	height: 6px; /* Slightly thicker progress bar */
 	background: linear-gradient(90deg, var(--rs-primary), var(--rs-accent));
 	transition: width 0.4s ease;
+	border-radius: 3px; /* Rounded progress bar */
 }
 
 /* Log Console */
@@ -343,6 +354,7 @@
 	display: none;
 	direction: ltr;
 	text-align: left;
+	border-radius: var(--rs-radius-small); /* Rounded log box */
 }
 .rs-log-box div {
 	padding: 2px 0;
@@ -353,7 +365,7 @@
 .status-badge {
 	display: inline-block;
 	padding: 4px 10px;
-	border-radius: 12px;
+	border-radius: 16px; /* Pill-shaped badges */
 	font-size: 11px;
 	font-weight: 500;
 	letter-spacing: 0.5px;
@@ -389,8 +401,8 @@
 .rs-toggle-switch {
     position: relative;
     display: inline-block;
-    width: 44px;
-    height: 24px;
+    width: 48px; /* Slightly wider */
+    height: 28px; /* Slightly taller */
 }
 .rs-toggle-switch input {
     opacity: 0;
@@ -411,8 +423,8 @@
 .rs-toggle-slider:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
+    height: 20px; /* Slightly larger circle */
+    width: 20px;
     left: 4px;
     bottom: 4px;
     background-color: white;
@@ -425,6 +437,76 @@ input:checked + .rs-toggle-slider {
 input:checked + .rs-toggle-slider:before {
     transform: translateX(20px);
 }
+
+/* --- 12. Robots.txt Page Specifics --- */
+#robots-preview {
+	background: var(--rs-primary);
+	color: #f0f0f0;
+	padding: 15px;
+	border-radius: var(--rs-radius-small); /* Rounded code preview */
+	height: 490px;
+	overflow: auto;
+	font-family: var(--rs-font-code);
+	direction: ltr;
+	text-align: left;
+	border: 1px solid var(--g-border);
+	box-shadow: inset 0 0 5px rgba(0,0,0,0.2); /* Inset shadow for depth */
+}
+
+/* Collapsible section for worker code */
+details {
+	border: 1px solid var(--g-border);
+	border-radius: var(--rs-radius-standard);
+	margin: 10px 0;
+	background-color: var(--g-white);
+	box-shadow: var(--rs-shadow-1);
+}
+summary {
+	padding: 12px 18px; /* More padding */
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--rs-primary);
+	border-bottom: 1px solid transparent; /* No initial border */
+	transition: border-bottom 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+details[open] summary {
+	border-bottom-color: var(--g-border); /* Border when open */
+	border-radius: var(--rs-radius-standard) var(--rs-radius-standard) 0 0;
+}
+details pre {
+	margin-top: 0; /* Remove top margin */
+	padding-top: 0; /* Remove top padding */
+	border-radius: 0 0 var(--rs-radius-standard) var(--rs-radius-standard);
+}
+
+
+/* --- 13. Notice Boxes (Help Module & Metabox) --- */
+.cpt-notice {
+    background-color: #e3f2fd; /* Light blue */
+    color: #1565c0; /* Darker blue */
+    border-right: 5px solid #2196f3; /* Stronger blue border */
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: var(--rs-radius-standard); /* Rounded corners */
+    box-shadow: var(--rs-shadow-1);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.cpt-notice strong {
+	color: var(--rs-primary); /* Ensure strong text is dark */
+}
+.cpt-notice::before {
+	content: "\f348"; /* Dashicon: info */
+	font-family: dashicons;
+	font-size: 24px;
+	line-height: 1;
+	color: #2196f3;
+}
+
 
 /*
  * End of Core Styles
