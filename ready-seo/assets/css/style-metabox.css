@@ -1,0 +1,169 @@
+/*
+ * Ready Studio - Metabox Base Styles (v12.0)
+ * Styles for the main metabox shell, tabs, and base modules (SEO, Content).
+ */
+
+:root {
+	/* متغیرها از فایل core به ارث می‌رسند */
+}
+
+/* --- Metabox Shell --- */
+#promptseo-app {
+	background: var(--g-white);
+	padding: 0;
+	position: relative;
+	border: 1px solid var(--g-border);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.rs-branding {
+	text-align: center;
+	padding: 16px 0;
+	border-bottom: 1px solid var(--g-border);
+}
+.rs-branding h4 {
+	margin: 0;
+	color: var(--rs-primary);
+	font-size: 16px;
+	font-weight: 700;
+}
+
+/* --- Metabox Tabs --- */
+#rs-metabox-tabs {
+	display: flex;
+	justify-content: space-around;
+	border-bottom: 1px solid var(--g-border);
+	padding: 0;
+	background: var(--g-white);
+	margin: 0;
+}
+
+#rs-metabox-tabs .rs-tab-link {
+	padding: 12px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--g-text-light);
+	cursor: pointer;
+	border-bottom: 2px solid transparent;
+	transition: all 0.2s;
+	flex: 1;
+	text-align: center;
+	margin-bottom: -1px; /* Overlap border */
+}
+
+#rs-metabox-tabs .rs-tab-link:hover {
+	background: var(--g-bg);
+}
+
+#rs-metabox-tabs .rs-tab-link.active {
+	color: var(--rs-primary);
+	border-bottom-color: var(--rs-primary);
+}
+
+.rs-metabox-content {
+	display: none;
+	padding: 16px;
+	animation: fadeIn 0.3s ease-out;
+}
+.rs-metabox-content.active {
+	display: block;
+}
+
+/* --- Fields (Used by all modules) --- */
+.pseo-field {
+	margin-bottom: 12px;
+}
+.pseo-field label {
+	display: block;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--g-text-dark);
+	margin-bottom: 6px;
+}
+
+.pseo-field input[type="text"],
+.pseo-field textarea {
+	width: 100%;
+	padding: 8px 12px;
+	font-size: 12px;
+	border: 1px solid var(--g-border);
+	border-radius: 4px;
+	background-color: #fff;
+	color: var(--g-text-dark);
+}
+.pseo-field textarea {
+	min-height: 70px;
+}
+
+.pseo-field input:focus,
+.pseo-field textarea:focus {
+	border-color: var(--g-blue);
+	box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+	outline: none;
+}
+
+/* --- Special Fields --- */
+.cpt-notice {
+	background: #e8f0fe;
+	color: #174ea6;
+	padding: 10px;
+	border-radius: 4px;
+	font-size: 12px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-right: 4px solid var(--g-blue);
+}
+.cpt-notice::before {
+	content: "💡";
+}
+
+#in-latin-name {
+	font-family: monospace;
+	direction: ltr;
+	text-align: left;
+	background: var(--g-bg);
+}
+
+/* --- Action Bar --- */
+.rs-metabox-actions {
+	margin-top: 15px;
+	border-top: 1px solid var(--g-border);
+	padding-top: 15px;
+}
+
+/* --- Loader --- */
+.rs-loader-wrap {
+	display: none;
+	text-align: center;
+	padding: 20px 0;
+}
+.spinner-rs {
+	width: 28px;
+	height: 28px;
+	border: 3px solid rgba(0, 0, 0, 0.1);
+	border-radius: 50%;
+	border-top-color: var(--rs-primary);
+	border-left-color: var(--rs-accent);
+	animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+	margin: 15px auto;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(5px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
