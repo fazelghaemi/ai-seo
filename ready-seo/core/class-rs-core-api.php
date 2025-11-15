@@ -2,11 +2,11 @@
 /**
  * Ready Studio SEO Engine - Core API (The Nexus Brain)
  *
- * v12.1: Fixed a critical Parse Error (syntax error) in the
- * call_gemini_text function on line 165 (extra single quote).
+ * v12.3: Added back the public `test_connection` function.
+ * v12.1: Fixed a critical Parse Error (syntax error).
  *
  * @package   ReadyStudio
- * @version   12.1.0
+ * @version   12.3.0
  * @author    Fazel Ghaemi
  */
 
@@ -152,9 +152,6 @@ class ReadyStudio_Core_API {
 		} else {
 			// AI returned an error (e.g., safety settings, 404)
 			$error_message = isset( $response['error']['message'] ) ? $response['error']['message'] : 'خطای ناشناخته از Gemini API';
-			
-			// *** THIS IS THE FIX (Line 165 area) ***
-			// Removed the extra single quote
 			return new WP_Error( 'ai_api_error', 'AI API Error: ' . $error_message );
 		}
 	}
@@ -211,6 +208,63 @@ class ReadyStudio_Core_API {
 	}
 
 	/**
+	 * *** NEW FUNCTION (Restored) ***
+	 * Public function to test the connection using *unsaved* credentials.
+	 *
+	 * @param string $worker_url The Worker URL from the form.
+	 * @param string $api_key    The API Key from the form.
+	 * @return array|WP_Error    Success message or WP_Error.
+	 */
+	public function test_connection( $worker_url, $api_key ) {
+		if ( empty( $worker_url ) || empty( $api_key ) ) {
+			return new WP_Error( 'missing_credentials', 'لطفا آدرس ورکر و کلید API را وارد کنید.' );
+		}
+		
+		$model_name = 'gemini-2.0-flash'; // Use flash for a fast test
+		
+		// 1. Build a simple test prompt
+		$system_prompt = "--- TASK ---
+        You are a connection test.
+        Respond ONLY with the following JSON (no markdown):
+        { \"message\": \"Test Successful\" }
+        ";
+
+		// 2. Prepare payload
+		$payload = [
+			'action_type'  => 'text',
+			'api_key'      => $api_key,
+			'model_name'   => $model_name,
+			'contents'     => [
+				[ 'role' => 'user', 'parts' => [ [ 'text' => $system_prompt ] ] ],
+			],
+			'generationConfig' => [ 'responseMimeType' => 'application/json' ],
+		];
+
+		// 3. Send to Cloudflare Worker (using provided, unsaved URL)
+		// Use a short timeout for the test
+		$response = $this->send_request( $worker_url, $payload, 20 ); // 20s timeout
+
+		// 4. Handle response
+		if ( is_wp_error( $response ) ) {
+			return $response; // Return WP_Error (e.g., "Worker Error: 500")
+		}
+
+		// 5. Parse the AI's JSON response
+		if ( isset( $response['candidates'][0]['content']['parts'][0]['text'] ) ) {
+			$json_data = json_decode( $response['candidates'][0]['content']['parts'][0]['text'], true );
+			
+			if ( isset( $json_data['message'] ) && $json_data['message'] === 'Test Successful' ) {
+				return [ 'message' => 'ارتباط موفقیت‌آمیز بود!' ]; // Success!
+			} else {
+				return new WP_Error( 'ai_test_failed', 'پاسخ تست نامعتبر بود.' );
+			}
+		} else {
+			$error_message = isset( $response['error']['message'] ) ? $response['error']['message'] : 'خطای ناشناخته در تست API';
+			return new WP_Error( 'ai_api_error', 'AI API Error: ' . $error_message );
+		}
+	}
+
+	/**
 	 * A private helper function to send wp_remote_post requests.
 	 *
 	 * @param string $url     The URL to post to (our Worker).
@@ -243,8 +297,11 @@ class ReadyStudio_Core_API {
 		}
 		
 		// The worker itself might have caught an error (e.g., 500)
+		// Or Gemini returned an error (which the worker passes through)
 		if ( isset( $data['error'] ) ) {
-			return new WP_Error( 'worker_internal_error', 'Worker Error: ' . $data['error'] );
+			// Use the message from the worker/gemini if available
+			$error_msg = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown worker error';
+			return new WP_Error( 'worker_internal_error', 'Error: ' . $error_msg );
 		}
 
 		// Success! Return the full, decoded response from Gemini

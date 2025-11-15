@@ -1,0 +1,71 @@
+export default {
+  async fetch(request, env, ctx) {
+    if (request.method !== "POST") {
+      return new Response(JSON.stringify({ error: { message: "Expected POST request" } }), {
+        status: 405,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    try {
+      const data = await request.json();
+      const { api_key, model_name, action_type } = data;
+
+      if (!api_key || !model_name) {
+        return new Response(JSON.stringify({ error: { message: "Missing API Key or Model Name" } }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      let geminiUrl;
+      let payload;
+
+      if (action_type === 'vision') {
+        geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model_name}:generateContent?key=${api_key}`;
+        const { system_prompt, image_data, mime_type } = data;
+        payload = {
+          contents: [{
+            parts: [
+              { text: system_prompt },
+              { inlineData: { mimeType: mime_type, data: image_data } }
+            ]
+          }],
+          generationConfig: { responseMimeType: "application/json" }
+        };
+      } else { // 'text' or default
+        geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model_name}:generateContent?key=${api_key}`;
+        const { contents, generationConfig } = data;
+        payload = {
+          contents: contents,
+          generationConfig: generationConfig
+        };
+      }
+
+      const geminiResponse = await fetch(geminiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const geminiData = await geminiResponse.json();
+
+      if (!geminiResponse.ok) {
+        // If Gemini returns an error, pass it through in a standard format
+        throw new Error(geminiData.error.message || "Unknown Gemini API error");
+      }
+
+      return new Response(JSON.stringify(geminiData), {
+        headers: { "Content-Type": "application/json" }
+      });
+
+    } catch (error) {
+      // --- CRITICAL FIX ---
+      // Send back a *standardized* error object that PHP can parse.
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+  }
+};

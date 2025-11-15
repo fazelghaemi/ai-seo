@@ -1,6 +1,8 @@
 /*
- * Ready Studio SEO Engine - Admin Core JS (v12.0)
- * Handles Settings Page Tabs and Bulk Generation Logic
+ * Ready Studio SEO Engine - Admin Core JS (v12.3)
+ *
+ * v12.3: Added AJAX handler for "Test Connection" button.
+ * v12.0: Handles Settings Page Tabs and Bulk Generation Logic
  */
 
 jQuery(document).ready(function ($) {
@@ -32,6 +34,45 @@ jQuery(document).ready(function ($) {
 		var urlParams = new URLSearchParams(window.location.search);
 		var activeTab = urlParams.get('tab') || 'api'; // Default to 'api'
 		$settingsPage.find('.rs-tab-link[data-tab="' + activeTab + '"]').click();
+		
+		// --- *** NEW: Test Connection AJAX Handler *** ---
+		$('#rs-test-connection-btn').click(function() {
+			var $btn = $(this);
+			var $resultDiv = $('#rs-test-connection-result');
+			var nonce = $('#rs_test_nonce').val();
+
+			// Get *current* (unsaved) values from form fields
+			var worker_url = $('#field-worker_url').val();
+			var api_key = $('#field-api_key').val();
+
+			// Set loading state
+			$btn.prop('disabled', true).text('در حال تست...');
+			$resultDiv.css('color', 'var(--g-text-light)').text('در حال ارسال درخواست تست به ورکر...');
+
+			$.post(ajaxurl, {
+				action: 'rs_test_connection',
+				worker_url: worker_url,
+				api_key: api_key,
+				rs_test_nonce: nonce // Send the nonce
+			})
+			.done(function(res) {
+				if (res.success) {
+					// Success (Green)
+					$resultDiv.css('color', 'var(--g-green)').text('✓ ' + res.data.message);
+				} else {
+					// Failure (Red)
+					$resultDiv.css('color', 'var(--g-red)').text('✗ خطا: ' + res.data.message);
+				}
+			})
+			.fail(function() {
+				// Server Error (Red)
+				$resultDiv.css('color', 'var(--g-red)').text('✗ خطای سرور. (AJAX Fail)');
+			})
+			.always(function() {
+				// Reset button
+				$btn.prop('disabled', false).text('تست ارتباط با ورکر');
+			});
+		});
 	}
 
 	// --- 2. Bulk Generator Logic ---
