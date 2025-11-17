@@ -2,12 +2,13 @@
 /**
  * Ready Studio SEO Engine - Core API (The Nexus Brain)
  *
- * v12.4: CRITICAL FIX - Updated the `send_request` function to
- * correctly parse the standardized error message from the worker.
- * v12.3: Added back the public `test_connection` function.
+ * v14.1: CRITICAL VISION FIX
+ * - The `call_gemini_vision` function was hard-coding 'gemini-1.5-flash'.
+ * - It is now updated to correctly read the new 'model_name_vision'
+ * setting (e.g., 'gemini-2.5-flash-preview-09-2025') from the options.
  *
  * @package   ReadyStudio
- * @version   12.4.0
+ * @version   14.1.0
  * @author    Fazel Ghaemi
  */
 
@@ -99,6 +100,7 @@ class ReadyStudio_Core_API {
 			return $config_check;
 		}
 
+		// Read the TEXT model from settings
 		$model_name = isset( $this->options['model_name'] ) ? $this->options['model_name'] : 'gemini-2.0-flash';
 		
 		// 1. Build the full prompt
@@ -171,14 +173,19 @@ class ReadyStudio_Core_API {
 			return $config_check;
 		}
 
-		// Vision models are different
-		$model_name = 'gemini-1.5-flash'; // Use 1.5 Flash as it handles vision well
+		// --- *** CRITICAL FIX (v14.1) *** ---
+		// Read the *VISION* model from the new settings dropdown.
+		// Fallback to the new 2.5 flash model if not set.
+		$model_name = isset( $this->options['model_name_vision'] ) 
+			? $this->options['model_name_vision'] 
+			: 'gemini-2.5-flash-preview-09-2025';
+		// --- End Fix ---
 
 		// 1. Prepare payload for the *worker* (Vision format)
 		$payload = [
 			'action_type'   => 'vision', // Tell worker this is a VISION job
 			'api_key'       => $this->api_key,
-			'model_name'    => $model_name,
+			'model_name'    => $model_name, // Use the correct vision model
 			'system_prompt' => $task_prompt, // The prompt is sent separately in this format
 			'image_data'    => $image_base64,
 			'mime_type'     => $mime_type,
@@ -259,7 +266,6 @@ class ReadyStudio_Core_API {
 				return new WP_Error( 'ai_test_failed', 'پاسخ تست نامعتبر بود.' );
 			}
 		} else {
-			// This block might be redundant now but good for safety
 			$error_message = isset( $response['error']['message'] ) ? $response['error']['message'] : 'خطای ناشناخته در تست API';
 			return new WP_Error( 'ai_api_error', 'AI API Error: ' . $error_message );
 		}
@@ -297,9 +303,7 @@ class ReadyStudio_Core_API {
 			return new WP_Error( 'worker_response_error', 'پاسخ نامعتبر از ورکر دریافت شد.' );
 		}
 		
-		// --- *** CRITICAL FIX (v12.4) *** ---
-		// Check for the standardized error object from the worker's catch block
-		// The worker now returns: {"error": {"message": "..."}}
+		// Check for the standardized error object
 		if ( isset( $data['error']['message'] ) ) {
 			// This is a standardized error from our worker OR Gemini
 			return new WP_Error( 'worker_internal_error', 'Error: ' . $data['error']['message'] );
