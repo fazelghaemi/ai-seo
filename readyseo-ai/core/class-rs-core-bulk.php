@@ -2,13 +2,12 @@
 /**
  * Ready Studio SEO Engine - Core Bulk Processor
  *
- * v12.5: CRITICAL FIX - Added `class_exists()` checks before calling
- * static methods from modules (SEO, Content, Vision). This prevents
- * a Fatal Error (Class not found) if a module file is missing or
- * hasn't been added to the repo yet.
+ * v12.6: HARDENED FIX - Changed 'Exception' to 'Throwable' to catch
+ * fatal errors (like Call to undefined method) that cause 500 errors.
+ * Added strict checks for API instance availability.
  *
  * @package   ReadyStudio
- * @version   12.5.0
+ * @version   12.6.0
  * @author    Fazel Ghaemi
  */
 
@@ -165,6 +164,8 @@ class ReadyStudio_Core_Bulk {
 		
 		// Prevent PHP from timing out on long-running bulk tasks.
 		@set_time_limit( 0 );
+		// Try to prevent user abort if connection drops (optional)
+		@ignore_user_abort( true );
 		
 		// 1. Security Check
 		if ( ! check_ajax_referer( 'rs_nonce_action', 'nonce', false ) ) {
@@ -190,28 +191,39 @@ class ReadyStudio_Core_Bulk {
 			return;
 		}
 
+		// 3. Check API Health (Internal Check)
+		if ( empty( self::$api ) ) {
+			wp_send_json_error( 'Internal Error: AI Brain (API) not initialized.' );
+			return;
+		}
+
 		$results = []; // To store success messages
 
-		// --- 3. Execute Operations based on options ---
-
+		// --- 4. Execute Operations ---
+		// We use Throwable to catch BOTH Exceptions and Fatal Errors (PHP 7+)
 		try {
 			// --- SEO Generation ---
-			// *** DEFENSIVE CHECK v12.5 ***
-			if ( ! empty( $opts['do_seo'] ) && class_exists( 'ReadyStudio_Module_SEO' ) ) {
+			if ( ! empty( $opts['do_seo'] ) ) {
+				if ( ! class_exists( 'ReadyStudio_Module_SEO' ) ) {
+					throw new Exception( 'ماژول سئو یافت نشد (Class Missing).' );
+				}
+
 				$post = get_post( $post_id );
+				if ( ! $post ) throw new Exception( 'Post not found.' );
+				
 				$content = self::$data->get_content_for_analysis( $post_id );
 				
-				// Build the task prompt for the API
+				// Build task prompt
 				$task_prompt = ReadyStudio_Module_SEO::get_task_prompt( $opts );
 				
-				// Call the Nexus Brain (Core API)
+				// Call Nexus Brain
 				$response = self::$api->call_gemini_text( $task_prompt, $content, $post->post_title );
 
 				if ( is_wp_error( $response ) ) {
 					throw new Exception( 'SEO Error: ' . $response->get_error_message() );
 				}
 				
-				// Save the data
+				// Save
 				self::$data->save_seo_meta( $post_id, $response );
 				if (isset($response['tags'])) {
 					self::$data->save_post_tags( $post_id, $response['tags'] );
@@ -220,13 +232,14 @@ class ReadyStudio_Core_Bulk {
 					self::$data->save_prompt_cpt_data( $post_id, $response['latin_name'] );
 				}
 				$results[] = 'SEO OK';
-			} elseif ( ! empty( $opts['do_seo'] ) ) {
-				$results[] = 'SEO Skipped (Module not found)';
 			}
 
 			// --- Content Generation ---
-			// *** DEFENSIVE CHECK v12.5 ***
-			if ( ! empty( $opts['do_content'] ) && class_exists( 'ReadyStudio_Module_Content' ) ) {
+			if ( ! empty( $opts['do_content'] ) ) {
+				if ( ! class_exists( 'ReadyStudio_Module_Content' ) ) {
+					throw new Exception( 'ماژول محتوا یافت نشد.' );
+				}
+
 				$post = get_post( $post_id );
 				$content = self::$data->get_content_for_analysis( $post_id );
 
@@ -244,34 +257,34 @@ class ReadyStudio_Core_Bulk {
 					self::$data->save_image_alt_text( $post_id, $response['image_alt'] );
 				}
 				$results[] = 'Content OK';
-			} elseif ( ! empty( $opts['do_content'] ) ) {
-				$results[] = 'Content Skipped (Module not found)';
 			}
-			
 			// --- Alt-Only Generation ---
-			// *** DEFENSIVE CHECK v12.5 ***
-			elseif ( ! empty( $opts['do_alt'] ) && class_exists( 'ReadyStudio_Module_Vision' ) ) {
-				$task_prompt = ReadyStudio_Module_Vision::get_task_prompt();
-				$image_data = ReadyStudio_Module_Vision::get_image_data( $post_id );
+			elseif ( ! empty( $opts['do_alt'] ) ) {
+				if ( class_exists( 'ReadyStudio_Module_Vision' ) ) {
+					$task_prompt = ReadyStudio_Module_Vision::get_task_prompt();
+					$image_data = ReadyStudio_Module_Vision::get_image_data( $post_id );
 
-				if ( is_array( $image_data ) ) {
-					$response = self::$api->call_gemini_vision( $task_prompt, $image_data['base64'], $image_data['mime_type'] );
-					if ( is_wp_error( $response ) ) {
-						throw new Exception( 'Vision Alt Error: ' . $response->get_error_message() );
+					if ( is_wp_error( $image_data ) ) {
+						// If no image, just skip gracefully
+						$results[] = 'Alt Skipped (' . $image_data->get_error_message() . ')';
+					} else {
+						$response = self::$api->call_gemini_vision( $task_prompt, $image_data['base64'], $image_data['mime_type'] );
+						if ( is_wp_error( $response ) ) {
+							throw new Exception( 'Vision Alt Error: ' . $response->get_error_message() );
+						}
+						if (isset($response['alt_text'])) {
+							self::$data->save_image_alt_text( $post_id, $response['alt_text'] );
+						}
+						$results[] = 'Alt (Vision) OK';
 					}
-					if (isset($response['alt_text'])) {
-						self::$data->save_image_alt_text( $post_id, $response['alt_text'] );
-					}
-					$results[] = 'Alt (Vision) OK';
 				} else {
-					$results[] = 'Alt Skipped (No Image)';
+					$results[] = 'Alt Skipped (Vision Module Missing)';
 				}
-			} elseif ( ! empty( $opts['do_alt'] ) ) {
-				$results[] = 'Alt Skipped (Vision Module not found)';
 			}
 
-		} catch ( Exception $e ) {
-			wp_send_json_error( $e->getMessage() );
+		} catch ( Throwable $e ) {
+			// This catches Fatal Errors AND Exceptions
+			wp_send_json_error( 'خطای سیستمی: ' . $e->getMessage() );
 			return;
 		}
 

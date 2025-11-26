@@ -2,13 +2,14 @@
 /**
  * Ready Studio SEO Engine - Core Settings
  *
- * v12.6: CRITICAL FIX - Removed the 'Robots.txt' submenu registration.
- * This was causing a fatal error because the module class was not
- * yet loaded. The module itself (class-rs-module-robots.php)
- * is correctly responsible for registering its own menu page.
+ * v14.0: CRITICAL VISION FIX
+ * - Added a *new* dropdown "model_name_vision" for Vision models.
+ * - Added `gemini-2.5-flash-preview-09-2025` as the new default
+ * vision model to fix the "1.5-flash not found" error.
+ * - Sanitizer updated to save the new vision model field.
  *
  * @package   ReadyStudio
- * @version   12.6.0
+ * @version   14.0.0
  * @author    Fazel Ghaemi
  */
 
@@ -91,8 +92,7 @@ class ReadyStudio_Core_Settings {
 			[ 'ReadyStudio_Core_Bulk', 'render_page' ] // Static callback
 		);
 		
-		// 3. *** REMOVED in v12.6 ***
-		// The 'Robots.txt' module now handles its own menu registration.
+		// 3. "Robots.txt" submenu (This is registered by its own module)
 	}
 
 	/**
@@ -150,6 +150,25 @@ class ReadyStudio_Core_Settings {
 			]
 		);
 
+		// --- *** NEW (v14.0): Vision Model Dropdown *** ---
+		add_settings_field(
+			'model_name_vision',
+			'مدل هوش مصنوعی (بصری/Vision)',
+			[ $this, 'render_field_select' ],
+			'promptseo_dashboard',
+			'rs_api_section',
+			[
+				'id' => 'model_name_vision',
+				'options' => [
+					'gemini-2.5-flash-preview-09-2025' => 'Gemini 2.5 Flash (جدید - پیشنهادی)',
+					'gemini-pro-vision'   => 'Gemini Pro Vision (کلاسیک)',
+				],
+				'default' => 'gemini-2.5-flash-preview-09-2025',
+				'desc' => 'مدلی که برای "تحلیل بصری" (تب ویژن) استفاده می‌شود.'
+			]
+		);
+		// --- End New Field ---
+
 		// --- Section 2: AI Brain Settings ---
 		add_settings_section(
 			'rs_brain_section',
@@ -181,9 +200,6 @@ class ReadyStudio_Core_Settings {
 				'desc' => 'قوانین اجباری که AI باید رعایت کند. (مثال: همیشه در توضیحات متا از هشتگ #ReadyPrompt استفاده کن.)'
 			]
 		);
-		
-		// *** REMOVED in v12.6 ***
-		// Robots.txt settings are now registered by the module itself.
 	}
 
 	/**
@@ -293,8 +309,6 @@ class ReadyStudio_Core_Settings {
 				mask: url('<?php echo esc_url( $icon_url ); ?>') no-repeat center center;
 				-webkit-mask-size: 18px 18px;
 				mask-size: 18px 18px;
-				background-size: 18px 18px;
-				background-position: center center;
 			}
 			<?php echo esc_html( $menu_id ); ?>:hover .wp-menu-image,
 			<?php echo esc_html( $menu_id ); ?>.wp-has-current-submenu .wp-menu-image,
@@ -325,6 +339,7 @@ class ReadyStudio_Core_Settings {
 		$id = esc_attr( $args['id'] );
 		$options = $args['options'];
 		$default = $args['default'];
+		$desc = isset( $args['desc'] ) ? esc_html( $args['desc'] ) : '';
 		$current_val = isset( $this->options[$id] ) ? $this->options[$id] : $default;
 		
 		echo "<div class='pseo-field'>";
@@ -333,13 +348,14 @@ class ReadyStudio_Core_Settings {
 			echo "<option value='" . esc_attr( $value ) . "' " . selected( $current_val, $value, false ) . ">" . esc_html( $label ) . "</option>";
 		}
 		echo "</select>";
+		if ($desc) {
+			echo "<p class='description'>{$desc}</p>";
+		}
 		echo "</div>";
 	}
 
 	public function render_field_textarea( $args ) {
-		// Default to main options group
 		$option_name = isset( $args['option_name'] ) ? esc_attr( $args['option_name'] ) : 'promptseo_ultimate_options';
-		// Load the correct options array
 		$options = ( $option_name === 'promptseo_ultimate_options' ) ? $this->options : get_option( $option_name, [] );
 		
 		$id = esc_attr( $args['id'] );
@@ -390,6 +406,10 @@ class ReadyStudio_Core_Settings {
 		if ( isset( $input['model_name'] ) ) {
 			$output['model_name'] = sanitize_text_field( $input['model_name'] );
 		}
+		// --- *** NEW (v14.0): Save Vision Model *** ---
+		if ( isset( $input['model_name_vision'] ) ) {
+			$output['model_name_vision'] = sanitize_text_field( $input['model_name_vision'] );
+		}
 		if ( isset( $input['site_knowledge_base'] ) ) {
 			$output['site_knowledge_base'] = wp_kses_post( $input['site_knowledge_base'] );
 		}
@@ -399,12 +419,5 @@ class ReadyStudio_Core_Settings {
 		
 		return $output;
 	}
-
-	/**
-	 * Sanitizes the robots.txt options array.
-	 * This is now correctly registered by the module itself.
-	 */
-	// public function sanitize_robots_options( $input ) { ... } 
-	// This function is now correctly located in class-rs-module-robots.php
 
 } // End class ReadyStudio_Core_Settings
